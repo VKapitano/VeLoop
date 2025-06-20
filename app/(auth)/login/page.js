@@ -34,7 +34,7 @@ export default function LoginPage() {
 
       // Simulate API delay
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/data');
       }, 1000);
     } else {
       setError('Invalid email or password');

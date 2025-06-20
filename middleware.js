@@ -20,7 +20,7 @@ export async function middleware(request) {
   // Redirect logic
   if (isAuthRoute) {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/data', request.url));
     }
     return NextResponse.next();
   }
