@@ -1,11 +1,12 @@
-import React from 'react'
+'use client';
+import React, { useState, useEffect } from 'react'; // Added
 import Link from 'next/link';
 import Image from 'next/image'; // I dalje je dobra praksa koristiti next/image
 
-import { Home, BarChart2, Package, Users, Settings } from 'lucide-react';
+import { Home, BarChart2, Package, Settings, Menu, X, Sun, Moon } from 'lucide-react';
 
 const ContentLayout = ({ children }) => {
-  return (
+    return (
         <div className="flex h-screen bg-gray-100">
             <Sidenav />
             <div className="flex flex-1 flex-col">
@@ -25,29 +26,29 @@ const Header = () => {
                 <div className="container mx-auto flex justify-between items-center p-4">
                     {/* Logo */}
                     <Link href="/">
-                    {/* Za maksimalnu jednostavnost, možemo koristiti i tekstualni logo */}
-                    <div className="text-2xl font-bold text-blue-600">
-                        MojLogo
-                    </div>
+                        {/* Za maksimalnu jednostavnost, možemo koristiti i tekstualni logo */}
+                        <div className="text-2xl font-bold text-blue-600">
+                            MojLogo
+                        </div>
                     </Link>
                     {/* Navigacija */}
                     <nav>
-                    {/* 'flex' poravnava linkove jedan do drugog
+                        {/* 'flex' poravnava linkove jedan do drugog
                         'gap-6' dodaje razmak od 6 jedinica (24px) između linkova */}
-                    <div className="flex items-center gap-6">
-                        <Link href="/o-nama" className="text-gray-600 hover:text-black font-medium">
-                        O nama
-                        </Link>
-                        <Link href="/usluge" className="text-gray-600 hover:text-black font-medium">
-                        Usluge
-                        </Link>
-                        <Link 
-                        href="/kontakt" 
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-semibold"
-                        >
-                        Kontakt
-                        </Link>
-                    </div>
+                        <div className="flex items-center gap-6">
+                            <Link href="/o-nama" className="text-gray-600 hover:text-black font-medium">
+                                O nama
+                            </Link>
+                            <Link href="/usluge" className="text-gray-600 hover:text-black font-medium">
+                                Usluge
+                            </Link>
+                            <Link
+                                href="/kontakt"
+                                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-semibold"
+                            >
+                                Kontakt
+                            </Link>
+                        </div>
                     </nav>
                 </div>
             </header>
@@ -56,61 +57,124 @@ const Header = () => {
 };
 
 const Sidenav = () => {
+    // State to manage whether the sidenav is open or closed
+    const [isOpen, setIsOpen] = useState(false);
+
+    // State to manage dark mode
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    // Effect to check for saved dark mode preference in localStorage
+    useEffect(() => {
+        const darkModeSaved = localStorage.getItem('darkMode') === 'true';
+        setIsDarkMode(darkModeSaved);
+    }, []);
+
+    // Effect to apply/remove the 'dark' class to the body and save preference
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('darkMode', 'false');
+        }
+    }, [isDarkMode]);
+
+    const toggleSidenav = () => setIsOpen(!isOpen);
+    const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+
     return (
-        // <aside> je i dalje dobar semantički izbor
-    // Stilovi su isti kao u prethodnom primeru i definišu izgled kontejnera
-    <aside className="w-64 h-screen bg-gray-100 border-r border-gray-200 p-5">
-      
-      {/* Logo sekcija */}
-      <div className="mb-10">
-        <h1 className="text-2xl font-bold text-gray-800">Moj Panel</h1>
-      </div>
+        <>
+            {/* Hamburger Menu Button to toggle Sidenav */}
+            {/* This button is positioned to be always visible */}
+            <button
+                onClick={toggleSidenav}
+                // CHANGED: Removed `lg:hidden` to make it visible on all screen sizes
+                className="fixed top-5 left-5 z-50 p-2 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                aria-label="Toggle navigation"
+            >
+                {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
 
-      {/* Navigaciona sekcija */}
-      <nav>
-        {/* Koristimo običnu listu i divove umesto linkova */}
-        <ul className="space-y-3">
-          
-          {/* Primer aktivnog linka (čisto vizuelno) */}
-          <li>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-blue-100 text-blue-700 font-semibold">
-              <Home size={20} />
-              <span>Početna</span>
-            </div>
-          </li>
+            {/* Overlay for mobile view - closes sidenav when clicked */}
+            {isOpen && (
+                <div
+                    onClick={toggleSidenav}
+                    // CHANGED: Removed `lg:hidden` to make it work on all screen sizes
+                    className="fixed inset-0 bg-black/50 z-30"
+                    aria-hidden="true"
+                ></div>
+            )}
 
-          {/* Primer običnog linka */}
-          <li>
-            <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-200 cursor-pointer">
-              <BarChart2 size={20} />
-              <span>Analitika</span>
-            </div>
-          </li>
+            {/* The Sidenav itself */}
+            <aside
+                className={`
+                    fixed top-0 left-0 z-40 w-64 h-screen p-5
+                    bg-gray-100 border-r border-gray-200
+                    dark:bg-gray-900 dark:border-gray-700
+                    transform transition-transform duration-300 ease-in-out
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+                `}
+            >
+                {/* Logo sekcija */}
+                {/*
+                <div className="mb-10">
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100"></h1>
+                </div>
+                */}
+                <br></br>
+                <br></br>
+                <br></br>
 
-          {/* Još jedan običan link */}
-          <li>
-            <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-200 cursor-pointer">
-              <Package size={20} />
-              <span>Proizvodi</span>
-            </div>
-          </li>
+                {/* Navigaciona sekcija */}
+                <nav>
+                    <ul className="space-y-3">
+                        {/* Primer aktivnog linka */}
+                        <li>
+                            <div className="flex items-center gap-3 p-2 rounded-lg bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900/40 dark:text-blue-300">
+                                <Home size={20} />
+                                <span>Početna</span>
+                            </div>
+                        </li>
 
-          {/* ...možeš dodati još stavki po potrebi... */}
+                        {/* Primer običnog linka */}
+                        <li>
+                            <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-200 cursor-pointer dark:text-gray-300 dark:hover:bg-gray-800">
+                                <BarChart2 size={20} />
+                                <span>Analitika</span>
+                            </div>
+                        </li>
 
-        </ul>
-      </nav>
+                        {/* Još jedan običan link */}
+                        <li>
+                            <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-200 cursor-pointer dark:text-gray-300 dark:hover:bg-gray-800">
+                                <Package size={20} />
+                                <span>Proizvodi</span>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
 
-       {/* Opcioni deo na dnu, npr. podešavanja */}
-       <div className="absolute bottom-5">
-         <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-200 cursor-pointer">
-            <Settings size={20} />
-            <span>Podešavanja</span>
-         </div>
-       </div>
+                {/* Sekcija na dnu: Podešavanja i Dark Mode Toggle */}
+                <div className="absolute bottom-5 left-5 right-5">
+                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-200 cursor-pointer dark:text-gray-300 dark:hover:bg-gray-800">
+                        <Settings size={20} />
+                        <span>Podešavanja</span>
+                    </div>
 
-    </aside>
-    )
-}
+                    {/* Dark Mode Toggle Button */}
+                    <button
+                        onClick={toggleDarkMode}
+                        className="w-full flex items-center gap-3 p-2 mt-3 rounded-lg text-gray-600 hover:bg-gray-200 cursor-pointer dark:text-gray-300 dark:hover:bg-gray-800"
+                    >
+                        {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                        <span>{isDarkMode ? 'Svetli Režim' : 'Tamni Režim'}</span>
+                    </button>
+                </div>
+            </aside>
+        </>
+    );
+};
 
 export default ContentLayout
 
