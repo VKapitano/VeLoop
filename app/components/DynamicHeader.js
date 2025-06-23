@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation'; // <-- Next.js hook za čitanje URL-a
-import { signOut } from 'next-auth/react';
+import { signOut } from 'next-auth/react'; // <-- ozbiljniji način za logout
+
 import Header from './Header';
 
 // Prihvaća props (npr. username) od Server komponente (layouta)
@@ -26,7 +27,7 @@ const DynamicHeader = ({ username }) => {
     const handleLogout = () => {
         // Poziv NextAuth funkcije za odjavu.
         // Ona će očistiti kolačić i preusmjeriti korisnika.
-        signOut({ callbackUrl: '/login' }); // <-- Možete specificirati gdje da preusmjeri korisnika nakon odjave
+        // signOut({ callbackUrl: '/login' }); // <-- Možete specificirati gdje da preusmjeri korisnika nakon odjave
     };
 
     // Renderira originalnu "glupu" Header komponentu s dinamičkim naslovom
