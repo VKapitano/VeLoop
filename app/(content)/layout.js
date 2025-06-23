@@ -4,12 +4,14 @@ import Image from 'next/image'; // I dalje je dobra praksa koristiti next/image
 
 import { Home, BarChart2, Package, Users, Settings } from 'lucide-react';
 
+import DynamicHeader from '../components/DynamicHeader';
+
 const ContentLayout = ({ children }) => {
   return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-800">
             <Sidenav />
             <div className="flex flex-1 flex-col">
-                <Header />
+                <DynamicHeader title="Ranges" username="Vedran Kapitanović"/>
                 <main className="flex-1 overflow-y-auto p-6">
                     {children}
                 </main>
@@ -18,10 +20,11 @@ const ContentLayout = ({ children }) => {
     )
 };
 
-const Header = () => {
+/* stari hader - nije u upotrebi*/
+const Header1 = () => {
     return (
         <div>
-            <header className="bg-white shadow-sm">
+            <header className="bg-gray-900 shadow-sm">
                 <div className="container mx-auto flex justify-between items-center p-4">
                     {/* Logo */}
                     <Link href="/">
@@ -59,7 +62,7 @@ const Sidenav = () => {
     return (
         // <aside> je i dalje dobar semantički izbor
     // Stilovi su isti kao u prethodnom primeru i definišu izgled kontejnera
-    <aside className="w-64 h-screen bg-gray-100 border-r border-gray-200 p-5">
+    <aside className="w-64 h-screen bg-gray-800 border-r border-gray-900 p-5">
       
       {/* Logo sekcija */}
       <div className="mb-10">
