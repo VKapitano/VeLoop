@@ -1,9 +1,8 @@
-import React from 'react'
+import DataPage from '../../components/Data'; // <-- CORRECTED PATH
 
-const pages = () => {
+export default function DataRoutePage() {
+  // The DataPage component contains everything: tabs, tables, search, etc.
   return (
-    <div>pages</div>
-  )
+    <DataPage />
+  );
 }
-
-export default pages
