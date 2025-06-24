@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react';
+import My_button from './My_button';
 
 const Ranges_bar = () => {
     return (
@@ -18,10 +19,10 @@ const Ranges_bar = () => {
             </div>
 
             {/* Desna strana: Gumb */}
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2">
+            <My_button variant="primary">
                 <span>+</span>
                 <span>Add New Range</span>
-            </button>
+            </My_button>
         </div>
     );
 };

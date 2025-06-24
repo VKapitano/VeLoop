@@ -1,17 +1,37 @@
-const My_button = () => {
-  return (
-    <div className="relative">
-        {/* Ikona unutar search bara */}
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-        
-        {/* Input polje */}
-        <input
-            type="text"
-            placeholder="Search ranges..."
-            className="w-full max-w-xs pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-    </div>
-  )
-}
+import React from 'react';
+import clsx from 'clsx';
 
-export default My_button
+const My_button = ({ variant = 'primary', children, className, ...props }) => {
+    // 1. Osnovni stilovi zajednički za sve gumbe
+    const baseStyles =
+        'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all duration-200 focus:outline-none';
+
+    // 2. Stilovi specifični za svaku varijantu
+    const variantStyles = {
+        // Crni obrub
+        'outline-dark': 'border border-gray-800 bg-transparent text-gray-800 hover:bg-gray-100 focus:ring-gray-500',
+        
+        // Plavi obrub
+        'outline-blue': 'border border-blue-600 bg-transparent text-blue-600 hover:bg-blue-50 focus:ring-blue-500',
+        
+        // Plava pozadina (primarna akcija)
+        'primary': 'border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+        
+        // Crvena pozadina (destruktivna akcija)
+        'danger': 'border border-transparent bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    };
+    
+    // Ako se traži varijanta koja ne postoji, koristi primarnu
+    const selectedVariant = variantStyles[variant] || variantStyles.primary;
+
+    return (
+        <button
+            className={clsx(baseStyles, selectedVariant, className)}
+            {...props} // Prosljeđuje onClick, type, itd.
+        >
+            {children}
+        </button>
+    );
+};
+
+export default My_button;

@@ -1,4 +1,5 @@
 import React from 'react'
+import My_button from './My_button';
 
 import { UserCircle, ChevronDown } from 'lucide-react';
 import { logout } from '../actions'; // <-- testni način za logout
@@ -19,7 +20,7 @@ const User_button = ({ username }) => {
 }
 
 const Header = ({ title, username, onLogout }) => {
-  return (
+    return (
         <header className="h-[70px] bg-gray-900 flex items-center justify-between px-6 shadow-md">
             {/* Lijeva strana: Naslov */}
             <h1 className="text-2xl font-bold text-white">
@@ -30,9 +31,9 @@ const Header = ({ title, username, onLogout }) => {
             <div className="flex items-center gap-4">
                 {/* Gumb za korisnički profil */}
                 <User_button username={ username } />
-                <button onClick={() => logout()} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                <My_button onClick={() => logout()} variant="danger">
                     Logout
-                </button>
+                </My_button>
             </div>
         </header>
     )
