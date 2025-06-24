@@ -11,39 +11,40 @@ const fakeData = [
 
 const Ranges_list = ({ children }) => {
     return (
-        // Glavni kontejner - rasteže se, bijela pozadina, zaobljeni rubovi, sjena i SAKRIVA overflow da bi rubovi ostali zaobljeni
-        <div className="flex-1 w-full bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-            
-            {/* 1. Zaglavlje liste/tablice */}
-            <div className="grid grid-cols-12 gap-4 bg-slate-50 border-b border-slate-200 px-6 py-3">
-                <div className="col-span-4 font-semibold text-sm text-slate-600">TITLE</div>
-                <div className="col-span-6 font-semibold text-sm text-slate-600">DESCRIPTION</div>
-                <div className="col-span-2 font-semibold text-sm text-slate-600 text-right">ACTIONS</div>
+        // Glavni kontejner: Dodane tamne pozadine i granice
+        <div className="flex-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden flex flex-col dark:border dark:border-gray-700">
+
+            {/* 1. Zaglavlje: Dodane tamne pozadine, granice i boje teksta */}
+            <div className="grid grid-cols-12 gap-4 bg-slate-50 dark:bg-gray-700/50 border-b border-slate-200 dark:border-gray-700 px-6 py-3">
+                <div className="col-span-4 font-semibold text-sm text-slate-600 dark:text-slate-400">TITLE</div>
+                <div className="col-span-6 font-semibold text-sm text-slate-600 dark:text-slate-400">DESCRIPTION</div>
+                <div className="col-span-2 font-semibold text-sm text-slate-600 dark:text-slate-400 text-right">ACTIONS</div>
             </div>
 
             {/* 2. Tijelo liste (skrolabilno) */}
             <div className="flex-1 overflow-y-auto">
                 {fakeData.map((item, index) => (
-                    <div 
-                        key={item.id} 
-                        className="grid grid-cols-12 gap-4 items-center px-6 py-4 border-b border-slate-200"
+                    <div
+                        key={item.id}
+                        // Redak: Dodana tamna boja granice i uklonjena donja granica za zadnji element
+                        className="grid grid-cols-12 gap-4 items-center px-6 py-4 border-b border-slate-200 dark:border-gray-700 last:border-b-0"
                     >
-                        {/* Stupac: TITLE */}
+                        {/* Stupac: TITLE - Dodana tamna boja teksta */}
                         <div className="col-span-4">
-                            <p className="text-blue-600 font-medium">{item.title}</p>
-                        </div>
-                        
-                        {/* Stupac: DESCRIPTION */}
-                        <div className="col-span-6">
-                            <p className="text-gray-800">{item.description}</p>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium">{item.title}</p>
                         </div>
 
-                        {/* Stupac: ACTIONS */}
+                        {/* Stupac: DESCRIPTION - Dodana tamna boja teksta */}
+                        <div className="col-span-6">
+                            <p className="text-gray-800 dark:text-gray-300">{item.description}</p>
+                        </div>
+
+                        {/* Stupac: ACTIONS - Dodane tamne boje za ikone */}
                         <div className="col-span-2 flex justify-end items-center gap-4">
-                            <button className="text-blue-500 hover:text-blue-700 transition-colors">
+                            <button className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
                                 <SquarePen size={20} />
                             </button>
-                            <button className="text-red-500 hover:text-red-700 transition-colors">
+                            <button className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
                                 <Trash2 size={20} />
                             </button>
                         </div>
