@@ -93,12 +93,12 @@ const Sidenav = () => {
             >
                 <div>
                     <div className="flex items-center h-[70px] border-b dark:border-gray-800 overflow-hidden">
-                        <div className="w-full flex items-center gap-4 p-3 pl-16 lg:pl-6 lg:justify-center group-hover:lg:justify-start">
+                        <Link href="/" className="w-full flex items-center gap-4 p-3 pl-16 lg:pl-6 lg:justify-center group-hover:lg:justify-start">
                             <Image src={coopLogo} alt="Logo Icon" width={32} height={32} className="flex-shrink-0" />
                             <span className="text-xl font-bold whitespace-nowrap dark:text-white transition-all duration-200 lg:w-0 lg:opacity-0 group-hover:lg:w-auto group-hover:lg:opacity-100">
                                 COOP
                             </span>
-                        </div>
+                        </Link>
                     </div>
                     <nav className="p-2 mt-4">
                         <ul className="space-y-2">
@@ -106,14 +106,14 @@ const Sidenav = () => {
                             <NavLink
                                 icon={<Home size={24} className="flex-shrink-0" />}
                                 text="Data"
-                                href="./data"
-                                active={pathname === './data'}
+                                href="/data"
+                                active={pathname === '/data'}
                             />
                             <NavLink
                                 icon={<List size={24} className="flex-shrink-0" />}
                                 text="Ranges"
-                                href="./ranges"
-                                active={pathname === './ranges'}
+                                href="/ranges"
+                                active={pathname === '/ranges'}
                             />
                             <NavLink
                                 icon={<UsersRound size={24} className="flex-shrink-0" />}
