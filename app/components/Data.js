@@ -35,7 +35,6 @@ const storeData = [
 ];
 
 // --- COLUMN DEFINITIONS ---
-// To start, only a subset of product columns are shown as requested.
 const productColumns = [
     { key: 'ean', label: 'EAN Code' },
     { key: 'society', label: 'Society' },
@@ -45,7 +44,6 @@ const productColumns = [
     { key: 'societyDescription', label: 'Society Description' },
 ];
 
-// All store columns are shown as requested.
 const storeColumns = [
     { key: 'society', label: 'Society' },
     { key: 'siteKey', label: 'Site Key' },
@@ -55,12 +53,9 @@ const storeColumns = [
     { key: 'salesFloor', label: 'Sales Floor SQ FT' },
 ];
 
+
 /**
  * Reusable DataTable component
- * @param {string} title - The title to display above the table.
- * @param {Array<Object>} data - The array of data to display.
- * @param {Array<Object>} columns - The column definitions.
- * @param {string} dataType - A string identifier for the data type (e.g., 'products').
  */
 const DataTable = ({ title, data, columns, dataType }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -80,7 +75,6 @@ const DataTable = ({ title, data, columns, dataType }) => {
         const rows = filteredData.map(item =>
             columns.map(col => {
                 let value = item[col.key];
-                // Handle commas in data by wrapping in double quotes
                 if (typeof value === 'string' && value.includes(',')) {
                     return `"${value}"`;
                 }
@@ -98,7 +92,6 @@ const DataTable = ({ title, data, columns, dataType }) => {
         document.body.removeChild(link);
     };
 
-    // Custom cell renderer for special cases like the date inputs in the stores table
     const renderCell = (item, column) => {
         const value = item[column.key];
         if (dataType === 'stores' && (column.key === 'openDate' || column.key === 'closeDate')) {
@@ -123,10 +116,10 @@ const DataTable = ({ title, data, columns, dataType }) => {
 
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 sm:mb-0">{title}</h2>
-                <div className="flex items-center space-x-2 w-full sm:w-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white w-full sm:w-auto">{title}</h2>
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                     <div className="relative w-full sm:w-64">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <Search className="w-5 h-5 text-gray-400" />
@@ -139,14 +132,19 @@ const DataTable = ({ title, data, columns, dataType }) => {
                             className="w-full pl-10 pr-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
-                    <button onClick={handleExportCSV} className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <FileUp className="w-4 h-4 mr-2" />
-                        Export CSV
-                    </button>
-                    <button className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <Filter className="w-4 h-4 mr-2" />
-                        Filter
-                    </button>
+                    {/* --- BUTTONS FIX --- */}
+                    {/* FIX: Buttons are now in a flex container to sit side-by-side on mobile. */}
+                    {/* `flex-1` makes them share the space, `sm:flex-initial` resets them on larger screens. */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button onClick={handleExportCSV} className="flex-1 sm:flex-initial flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <FileUp className="w-4 h-4 mr-2" />
+                            Export
+                        </button>
+                        <button className="flex-1 sm:flex-initial flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <Filter className="w-4 h-4 mr-2" />
+                            Filter
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="overflow-x-auto">
@@ -187,11 +185,11 @@ const DataPage = () => {
     return (
         <div className="w-full">
             <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-                <nav className="flex space-x-8" aria-label="Tabs">
+                <nav className="flex space-x-4 sm:space-x-8" aria-label="Tabs">
                     <button
                         onClick={() => setActiveTab('products')}
-                        className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'products'
-                            ? 'border-gray-500 text-gray-600 dark:text-blue-400'
+                        className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'products'
+                            ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
                     >
@@ -199,8 +197,8 @@ const DataPage = () => {
                     </button>
                     <button
                         onClick={() => setActiveTab('stores')}
-                        className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'stores'
-                            ? 'border-gray-500 text-gray-600 dark:text-blue-400'
+                        className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'stores'
+                            ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
                     >

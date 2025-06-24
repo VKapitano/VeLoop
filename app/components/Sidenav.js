@@ -42,7 +42,7 @@ const Sidenav = () => {
                 <div className={`
                     flex items-center p-3 rounded-lg cursor-pointer overflow-hidden gap-4
                     ${active
-                        ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900/40 dark:text-blue-300'
+                        ? 'bg-gray-100 text-[#05a9d0] font-semibold dark:bg-blue-900/40 dark:text-blue-300'
                         : 'text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800'
                     }
                  `}>
@@ -88,8 +88,11 @@ const Sidenav = () => {
             >
                 <div>
                     {/* --- START OF LOGO FIX --- */}
-                    <div className="flex items-center h-[70px] border-b dark:border-gray-800 overflow-hidden">
-                        <Link href="/data" className="w-full flex items-center gap-4 p-3 pl-16 lg:p-5">
+                    {/* FIX: Adjusted padding for proper alignment on all screen sizes. 
+                        - The container now has horizontal padding matching the nav element.
+                        - The Link now has consistent padding that works for mobile and collapsed desktop views. */}
+                    <div className="flex items-center h-[70px] border-b dark:border-gray-800 overflow-hidden px-2">
+                        <Link href="/data" className="w-full flex items-center gap-4 p-3 rounded-lg">
                             <div className="flex-shrink-0 w-10 flex justify-center">
                                 <Image src={coopLogo} alt="Logo Icon" width={32} height={32} className="flex-shrink-0" />
                             </div>
@@ -126,6 +129,7 @@ const Sidenav = () => {
                 <div className="p-2 border-t dark:border-gray-800">
                     <ul className="space-y-2">
                         {/* --- START OF DARK MODE TOGGLE FIX --- */}
+                        {/* This section was already structured correctly and aligns with the NavLink component. No changes were needed. */}
                         <li>
                             <div
                                 onClick={toggleDarkMode}
