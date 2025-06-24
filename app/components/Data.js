@@ -189,7 +189,7 @@ const DataPage = () => {
                     <button
                         onClick={() => setActiveTab('products')}
                         className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'products'
-                            ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                            ? 'border-[#05a9d0] text-[#05a9d0] dark:border-[#05a9d0] dark:text-[#05a9d0]'
                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
                     >
@@ -198,7 +198,7 @@ const DataPage = () => {
                     <button
                         onClick={() => setActiveTab('stores')}
                         className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'stores'
-                            ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                            ? 'border-[#05a9d0] text-[#05a9d0] dark:border-[#05a9d0] dark:text-[#05a9d0]'
                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
                     >
