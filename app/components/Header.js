@@ -28,7 +28,7 @@ const Header = ({ title, username, onLogout }) => {
         // FIX: Added responsive padding and reduced title size on mobile
         <header className="h-[70px] bg-gray-200 dark:bg-gray-900 flex items-center justify-between px-4 sm:px-6 shadow-md flex-shrink-0">
             {/* Lijeva strana: Naslov */}
-            <h1 className="text-xl sm:text-2xl mx-13 font-bold text-gray-200 truncate">
+            <h1 className="text-xl sm:text-2xl mx-13 lg:mx-4 font-bold text-gray-200 truncate">
                 {title}
             </h1>
 

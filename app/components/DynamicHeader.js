@@ -17,7 +17,7 @@ const DynamicHeader = ({ username }) => {
             setTitle('Data');
         } else if (pathname.includes('/ranges')) {
             setTitle('Ranges');
-        } else if (pathname.includes('/ranges')) {
+        } else if (pathname.includes('/users')) {
             setTitle('Users');
         } else {
             // Fallback naslov ako je potrebno
@@ -25,7 +25,7 @@ const DynamicHeader = ({ username }) => {
         }
     }, [pathname]);
 
-     // Funkcija koja će se pozvati na klik
+    // Funkcija koja će se pozvati na klik
     const handleLogout = () => {
         // Poziv NextAuth funkcije za odjavu.
         // Ona će očistiti kolačić i preusmjeriti korisnika.
