@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, FileUp, Filter } from 'lucide-react';
+import { Search, FileUp, Filter, Pencil } from 'lucide-react';
 import My_button from './My_button';
 
 // --- MOCK DATA ---
@@ -22,18 +22,19 @@ const productData = [
 ];
 
 const storeData = [
-    { society: 'Central', siteKey: 100071, openDate: '30/12/2014', closeDate: '29/11/2024', siteName: 'Store A', salesFloor: 3000 },
-    { society: 'Central', siteKey: 100072, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store B', salesFloor: 2500 },
-    { society: 'Central', siteKey: 100077, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store C', salesFloor: 3000 },
-    { society: 'Central', siteKey: 100078, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store D', salesFloor: 7730 },
-    { society: 'Central', siteKey: 200092, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store E', salesFloor: 7077 },
-    { society: 'Central', siteKey: 200097, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store F', salesFloor: 980 },
-    { society: 'Central', siteKey: 300082, openDate: '30/12/2014', closeDate: '24/01/2020', siteName: 'Store G', salesFloor: 1775 },
-    { society: 'Central', siteKey: 300083, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store H', salesFloor: 2585 },
-    { society: 'Central', siteKey: 300086, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store I', salesFloor: 1946 },
-    { society: 'Central', siteKey: 400080, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store J', salesFloor: 2982 },
-    { society: 'Central', siteKey: 400092, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store K', salesFloor: 3000 },
+    { society: 'Central', siteKey: 100071, openDate: '30/12/2014', closeDate: '29/11/2024', siteName: 'Store A', salesFloor: 3000, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 100072, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store B', salesFloor: 2500, salesFloorBand: 'Band B' },
+    { society: 'Central', siteKey: 100077, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store C', salesFloor: 3000, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 100078, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store D', salesFloor: 7730, salesFloorBand: 'Band E' },
+    { society: 'Central', siteKey: 200092, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store E', salesFloor: 7077, salesFloorBand: 'Band E' },
+    { society: 'Central', siteKey: 200097, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store F', salesFloor: 980, salesFloorBand: 'Band A' },
+    { society: 'Central', siteKey: 300082, openDate: '30/12/2014', closeDate: '24/01/2020', siteName: 'Store G', salesFloor: 1775, salesFloorBand: 'Band B' },
+    { society: 'Central', siteKey: 300083, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store H', salesFloor: 2585, salesFloorBand: 'Band B' },
+    { society: 'Central', siteKey: 300086, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store I', salesFloor: 1946, salesFloorBand: 'Band B' },
+    { society: 'Central', siteKey: 400080, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store J', salesFloor: 2982, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 400092, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store K', salesFloor: 3000, salesFloorBand: 'Band C' },
 ];
+
 
 // --- COLUMN DEFINITIONS ---
 const productColumns = [
@@ -52,14 +53,34 @@ const storeColumns = [
     { key: 'closeDate', label: 'Close Date' },
     { key: 'siteName', label: 'Site Name' },
     { key: 'salesFloor', label: 'Sales Floor SQ FT' },
+    { key: 'salesFloorBand', label: 'Sales Floor SQ FT Band' },
 ];
+
+// --- EDITABLE COLUMNS CONFIG ---
+const editableProductCols = ['description', 'societyDescription'];
+const editableStoreCols = ['openDate', 'closeDate', 'salesFloorBand'];
+const narrowColumnKeys = ['openDate', 'closeDate', 'salesFloorBand']; // Columns to be made narrower
+
+// --- DATE HELPER FUNCTIONS ---
+const formatDateForInput = (ddmmyyyy) => {
+    if (!ddmmyyyy || ddmmyyyy.split('/').length !== 3) return '';
+    const [day, month, year] = ddmmyyyy.split('/');
+    return `${year}-${month}-${day}`;
+};
+
+const formatDateForDisplay = (yyyymmdd) => {
+    if (!yyyymmdd || yyyymmdd.split('-').length !== 3) return '';
+    const [year, month, day] = yyyymmdd.split('-');
+    return `${day}/${month}/${year}`;
+};
 
 
 /**
  * Reusable DataTable component
  */
-const DataTable = ({ title, data, columns, dataType }) => {
+const DataTable = ({ title, data, columns, dataType, onUpdate }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [editingCell, setEditingCell] = useState(null); // e.g., { index: 0, key: 'description' }
 
     const filteredData = useMemo(() => {
         if (!searchTerm) return data;
@@ -83,8 +104,6 @@ const DataTable = ({ title, data, columns, dataType }) => {
             }).join(',')
         );
 
-        // Prepending 'sep=,\n' tells Excel to use a comma as the separator,
-        // which fixes the issue of all data appearing in a single column.
         const csvContent = 'sep=,\n' + [headers, ...rows].join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' });
         const link = document.createElement('a');
@@ -95,25 +114,62 @@ const DataTable = ({ title, data, columns, dataType }) => {
         document.body.removeChild(link);
     };
 
-    const renderCell = (item, column) => {
+    const handleCellClick = (index, key) => {
+        const isEditable = (dataType === 'products' && editableProductCols.includes(key)) ||
+            (dataType === 'stores' && editableStoreCols.includes(key));
+        if (isEditable) {
+            setEditingCell({ index, key });
+        }
+    };
+
+    const handleSave = (index, key, value) => {
+        let finalValue = value;
+        if ((key === 'openDate' || key === 'closeDate') && value) {
+            finalValue = formatDateForDisplay(value);
+        }
+        onUpdate(index, key, finalValue);
+        setEditingCell(null);
+    };
+
+    const renderCell = (item, column, index) => {
+        const isEditable = (dataType === 'products' && editableProductCols.includes(column.key)) ||
+            (dataType === 'stores' && editableStoreCols.includes(column.key));
+        const isEditing = editingCell?.index === index && editingCell?.key === column.key;
         const value = item[column.key];
-        if (dataType === 'stores' && (column.key === 'openDate' || column.key === 'closeDate')) {
+
+        if (isEditing) {
+            const isDate = column.key === 'openDate' || column.key === 'closeDate';
             return (
-                <div className="relative">
+                <input
+                    type={isDate ? 'date' : 'text'}
+                    defaultValue={isDate ? formatDateForInput(value) : value}
+                    onBlur={(e) => handleSave(index, column.key, e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSave(index, column.key, e.target.value);
+                        if (e.key === 'Escape') setEditingCell(null);
+                    }}
+                    className="w-full p-1.5 border border-blue-500 rounded-md bg-gray-100 dark:bg-gray-900 focus:ring-1 focus:ring-blue-500 outline-none"
+                    autoFocus
+                />
+            );
+        }
+
+        if (isEditable) {
+            return (
+                <div className="group relative w-full">
                     <input
                         type="text"
                         readOnly
                         value={value}
-                        className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-200 text-sm rounded-lg block w-full p-2.5 pr-8"
+                        className="w-full cursor-pointer bg-transparent border border-gray-300 dark:border-gray-600 rounded-md p-1.5 pr-8 truncate group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors"
                     />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4Z M0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                        </svg>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Pencil className="w-4 h-4 text-blue-500" />
                     </div>
                 </div>
             );
         }
+
         return value;
     };
 
@@ -152,7 +208,11 @@ const DataTable = ({ title, data, columns, dataType }) => {
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             {columns.map(col => (
-                                <th key={col.key} scope="col" className="px-6 py-3 font-semibold">
+                                <th
+                                    key={col.key}
+                                    scope="col"
+                                    className={`px-6 py-3 font-semibold ${narrowColumnKeys.includes(col.key) ? 'w-48' : ''}`}
+                                >
                                     {col.label}
                                 </th>
                             ))}
@@ -162,8 +222,12 @@ const DataTable = ({ title, data, columns, dataType }) => {
                         {filteredData.map((item, index) => (
                             <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 {columns.map(col => (
-                                    <td key={col.key} className="px-6 py-4 text-gray-900 dark:text-white whitespace-nowrap">
-                                        {renderCell(item, col)}
+                                    <td
+                                        key={col.key}
+                                        className={`px-6 py-2 text-gray-900 dark:text-white whitespace-nowrap ${narrowColumnKeys.includes(col.key) ? 'w-48' : ''}`}
+                                        onClick={() => handleCellClick(index, col.key)}
+                                    >
+                                        {renderCell(item, col, index)}
                                     </td>
                                 ))}
                             </tr>
@@ -181,6 +245,21 @@ const DataTable = ({ title, data, columns, dataType }) => {
  */
 const DataPage = () => {
     const [activeTab, setActiveTab] = useState('products');
+    const [products, setProducts] = useState(productData);
+    const [stores, setStores] = useState(storeData);
+
+    const handleProductUpdate = (index, key, value) => {
+        const updatedProducts = [...products];
+        updatedProducts[index] = { ...updatedProducts[index], [key]: value };
+        setProducts(updatedProducts);
+    };
+
+    const handleStoreUpdate = (index, key, value) => {
+        const updatedStores = [...stores];
+        updatedStores[index] = { ...updatedStores[index], [key]: value };
+        setStores(updatedStores);
+    };
+
 
     return (
         <div className="w-full">
@@ -211,17 +290,19 @@ const DataPage = () => {
                 {activeTab === 'products' && (
                     <DataTable
                         title="Products Data"
-                        data={productData}
+                        data={products}
                         columns={productColumns}
                         dataType="products"
+                        onUpdate={handleProductUpdate}
                     />
                 )}
                 {activeTab === 'stores' && (
                     <DataTable
                         title="Stores Data"
-                        data={storeData}
+                        data={stores}
                         columns={storeColumns}
                         dataType="stores"
+                        onUpdate={handleStoreUpdate}
                     />
                 )}
             </div>
