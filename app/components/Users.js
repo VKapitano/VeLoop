@@ -175,9 +175,15 @@ const Users = () => {
 
             {/* Delete Confirmation Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                    {/* ... modal content ... */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center">
+                    {/* Overlay with the desired "fogged" effect */}
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={handleCancelDelete}
+                    ></div>
+
+                    {/* Modal Content */}
+                    <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Confirm Deletion</h3>
                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                             Are you sure you want to delete the user <strong className="dark:text-white">{userToDelete?.email}</strong>? This action cannot be undone.
