@@ -42,7 +42,7 @@ const Sidenav = () => {
                 <div className={`
                     flex items-center p-3 rounded-lg cursor-pointer overflow-hidden gap-4
                     ${active
-                        ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900/40 dark:text-blue-300'
+                        ? 'bg-gray-100 text-[#05a9d0] font-semibold dark:bg-blue-900/40 dark:text-blue-300'
                         : 'text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800'
                     }
                  `}>
@@ -86,9 +86,9 @@ const Sidenav = () => {
                     w-64 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
                 `}
             >
-                <div>
+                <div className="pt-14 md:pt-0">
                     {/* --- START OF LOGO FIX --- */}
-                    <div className="flex items-center h-[70px] border-b dark:border-gray-800 overflow-hidden">
+                    <div className=" items-center h-[70px] border-b dark:border-gray-800 overflow-hidden hidden md:block">
                         <Link href="/data" className="w-full flex items-center gap-4 p-3 pl-16 lg:p-5">
                             <div className="flex-shrink-0 w-10 flex justify-center">
                                 <Image src={coopLogo} alt="Logo Icon" width={32} height={32} className="flex-shrink-0" />
