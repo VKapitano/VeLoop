@@ -83,8 +83,10 @@ const DataTable = ({ title, data, columns, dataType }) => {
             }).join(',')
         );
 
-        const csvContent = [headers, ...rows].join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-s-8,' });
+        // Prepending 'sep=,\n' tells Excel to use a comma as the separator,
+        // which fixes the issue of all data appearing in a single column.
+        const csvContent = 'sep=,\n' + [headers, ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.setAttribute('download', `${dataType}_data.csv`);
