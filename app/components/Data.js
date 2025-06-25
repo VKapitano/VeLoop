@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Search, FileUp, Filter } from 'lucide-react';
+import My_button from './My_button';
 
 // --- MOCK DATA ---
 // Using static mock data as a starting point, as requested.
@@ -139,14 +140,14 @@ const DataTable = ({ title, data, columns, dataType }) => {
                             className="w-full pl-10 pr-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
-                    <button onClick={handleExportCSV} className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <My_button variant="outline-blue">
                         <FileUp className="w-4 h-4 mr-2" />
-                        Export CSV
-                    </button>
-                    <button className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <span>Export CSV</span>
+                    </My_button>
+                    <My_button onClick={handleExportCSV} variant="outline-dark">
                         <Filter className="w-4 h-4 mr-2" />
-                        Filter
-                    </button>
+                        <span>Filter</span>
+                    </My_button>
                 </div>
             </div>
             <div className="overflow-x-auto">
