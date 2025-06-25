@@ -17,6 +17,8 @@ const DynamicHeader = ({ username }) => {
             setTitle('Data');
         } else if (pathname.includes('/ranges')) {
             setTitle('Ranges');
+        } else if (pathname.includes('/ranges')) {
+            setTitle('Users');
         } else {
             // Fallback naslov ako je potrebno
             setTitle('Dashboard');

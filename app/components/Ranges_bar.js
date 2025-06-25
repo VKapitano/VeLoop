@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react';
+import Link from 'next/link';
 import My_button from './My_button';
 
 const Ranges_bar = () => {
@@ -19,10 +20,12 @@ const Ranges_bar = () => {
             </div>
 
             {/* Desna strana: Gumb */}
-            <My_button variant="primary">
-                <span>+</span>
-                <span className=''>Add New Range</span>
-            </My_button>
+            <Link href="/ranges/add" passHref>
+                <My_button variant="primary">
+                    <span>+</span>
+                    <span className=''>Add New Range</span>
+                </My_button>
+            </Link>
         </div>
     );
 };

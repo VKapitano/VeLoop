@@ -6,15 +6,15 @@ import { logout } from '../actions'; // <-- testni način za logout
 
 const User_button = ({ username }) => {
     return (
-        <button className="flex items-center gap-2 text-white group bg-gray-800 hover:bg-gray-200 p-2 rounded-lg transition-colors duration-200">
+        <button className="flex items-center gap-2 text-white group bg-gray-800 hover:bg-gray-400 p-2 rounded-lg transition-colors duration-200">
             {/* Okrugla placeholder ikona korisnika */}
-            <UserCircle size={28} className="text-gray-200 group-hover:text-gray-700" />
+            <UserCircle size={28} className="text-gray-200 group-hover:text-gray-900" />
 
             {/* Ime korisnika */}
-            <span className="font-medium group-hover:text-gray-700">{username}</span>
+            <span className="font-medium group-hover:text-gray-900">{username}</span>
 
             {/* Ikona za padajući izbornik */}
-            <ChevronDown size={20} className="text-gray-200 group-hover:text-gray-700" />
+            <ChevronDown size={20} className="text-gray-200 group-hover:text-gray-900" />
         </button>
     )
 }
