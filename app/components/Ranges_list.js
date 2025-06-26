@@ -40,9 +40,9 @@ const Ranges_list = ({ data }) => {
         <div className="flex-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden flex flex-col dark:border dark:border-gray-700">
 
             {/* 1. Zaglavlje: Dodane tamne pozadine, granice i boje teksta */}
-            <div className="grid grid-cols-12 gap-4 bg-slate-50 dark:bg-gray-700/50 border-b border-slate-200 dark:border-gray-700 px-6 py-3">
+            <div className="grid grid-cols-24 gap-4 bg-slate-50 dark:bg-gray-700/50 border-b border-slate-200 dark:border-gray-700 px-6 py-3">
                 <div 
-                    className="col-span-8 md:col-span-4 font-semibold text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2 cursor-pointer hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                    className="col-span-16 sm:col-span-8 lg:col-span-6 font-semibold text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2 cursor-pointer hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
                     onClick={handleSort}
                     >
                     <span>TITLE</span>
@@ -50,8 +50,11 @@ const Ranges_list = ({ data }) => {
                     {sortDirection === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} 
                     />}
                 </div>
-                <div className="hidden md:block md:col-span-6 font-semibold text-sm text-slate-600 dark:text-slate-400">DESCRIPTION</div>
-                <div className="col-span-4 md:col-span-2 font-semibold text-sm text-slate-600 dark:text-slate-400 text-right">ACTIONS</div>
+                <div className="hidden lg:block lg:col-span-8 font-semibold text-sm text-slate-600 dark:text-slate-400">DESCRIPTION</div>
+                <div className="hidden sm:flex sm:col-span-3 lg:col-span-2 justify-center font-semibold text-sm text-slate-600 dark:text-slate-400">ITEMS</div>
+                <div className="hidden sm:flex sm:col-span-5 lg:col-span-3 justify-center font-semibold text-sm text-slate-600 dark:text-slate-400">START DATE</div>
+                <div className="hidden sm:flex sm:col-span-5 lg:col-span-3 justify-center font-semibold text-sm text-slate-600 dark:text-slate-400">END DATE</div>
+                <div className="col-span-8 sm:col-span-3 lg:col-span-2 font-semibold text-sm text-slate-600 dark:text-slate-400 text-right">ACTIONS</div>
             </div>
 
             {/* 2. Tijelo liste (skrolabilno) */}
@@ -60,20 +63,33 @@ const Ranges_list = ({ data }) => {
                     <div
                         key={item.id}
                         // Redak: Dodana tamna boja granice i uklonjena donja granica za zadnji element
-                        className="grid grid-cols-12 gap-4 items-center px-6 py-4 border-b border-slate-200 dark:border-gray-700 last:border-b-0"
+                        className="grid grid-cols-24 gap-4 items-center px-6 py-4 border-b border-slate-200 dark:border-gray-700 last:border-b-0"
                     >
                         {/* Stupac: TITLE - Dodana tamna boja teksta */}
-                        <div className="col-span-8 md:col-span-4">
-                            <p className="text-blue-600 dark:text-blue-400 font-medium">{item.title}</p>
+                        <div className="col-span-16 sm:col-span-8 lg:col-span-6">
+                            <p className="text-blue-600 dark:text-blue-400 font-medium truncate">{item.title}</p>
                         </div>
 
                         {/* Stupac: DESCRIPTION - Dodana tamna boja teksta */}
-                        <div className="hidden md:block md:col-span-6">
-                            <p className="text-gray-800 dark:text-gray-300">{item.description}</p>
+                        <div className="hidden lg:block lg:col-span-8">
+                            <p className="text-gray-800 dark:text-gray-300 truncate">{item.description}</p>
+                        </div>
+
+                        {/* Stupac: ITEMS - Dodana tamna boja teksta */}
+                        <div className="hidden sm:flex sm:col-span-3 lg:col-span-2 justify-center">
+                            <p className="text-gray-800 dark:text-gray-300">{item.items.length}</p>
+                        </div>
+
+                        {/* Stupac: DATE - Dodana tamna boja teksta */}
+                        <div className="hidden sm:flex sm:col-span-5 lg:col-span-3 justify-center">
+                            <p className="text-gray-800 dark:text-gray-300">{item.startDate}</p>
+                        </div>
+                        <div className="hidden sm:flex sm:col-span-5 lg:col-span-3 justify-center">
+                            <p className="text-gray-800 dark:text-gray-300">{item.endDate}</p>
                         </div>
 
                         {/* Stupac: ACTIONS - Dodane tamne boje za ikone */}
-                        <div className="col-span-4 md:col-span-2 flex justify-end items-center gap-4">
+                        <div className="col-span-8 sm:col-span-3 lg:col-span-2 flex justify-end items-center gap-4">
                             <button className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
                                 <SquarePen size={20} />
                             </button>
