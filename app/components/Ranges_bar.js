@@ -11,7 +11,8 @@ const Ranges_bar = ( {searchTerm, onSearchChange} ) => {
             <div className="flex-1 mr-4"> {/* Dodan flex-1 da zauzme dostupan prostor */}
                 <Search_bar 
                     searchTerm={searchTerm} 
-                    onSearchChange={onSearchChange} 
+                    onSearchChange={onSearchChange}
+                    placeholder_text={"Search ranges..."}
                 />
             </div>
 

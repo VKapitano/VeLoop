@@ -10,7 +10,7 @@ import { logout } from '../actions'; // <-- testni način za logout
 const User_button = ({ username }) => {
     return (
         // FIX: Added responsive classes to hide text and chevron on small screens
-        <button className="flex items-center gap-2 text-white group bg-gray-800 hover:bg-gray-200 p-2 rounded-lg transition-colors duration-200 ">
+        <button className="flex items-center h-full gap-2 text-white group bg-gray-800 hover:bg-gray-200 p-2 rounded-lg transition-colors duration-200 ">
             {/* Okrugla placeholder ikona korisnika */}
             <UserCircle size={28} className="text-gray-200 group-hover:text-gray-700" />
 
@@ -33,11 +33,11 @@ const Header = ({ title, username, onLogout }) => {
             </h1>
 
             {/* Desna strana: Gumbovi */}
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex h-[44px] items-center gap-2 sm:gap-4">
                 {/* Gumb za korisnički profil */}
                 <User_button username={username} />
                 {/* FIX: Logout button now shows an icon on mobile and text on larger screens */}
-                <My_button onClick={() => logout()} variant="danger">
+                <My_button onClick={() => logout()} variant="danger" className="h-full w-[44px] sm:w-[88px]">
                     <span className="sm:hidden">
                         <LogOut size={20} />
                     </span>

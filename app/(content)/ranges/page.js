@@ -2,37 +2,31 @@
 
 import React, { useState, useMemo } from 'react';
 
+import { useRanges } from '../../context/RangesContext';
+
 import Ranges_bar from '../../components/Ranges_bar'
 import Ranges_list from '../../components/Ranges_list'
 import Search_bar from '@/app/components/Search_bar'
 
-const initialData = [
-    { id: 1, title: 'Summer Sale 2024', description: 'Discount range for all summer items.' },
-    { id: 2, title: 'Black Friday Deals', description: 'Special offers available only on Black Friday.' },
-    { id: 3, title: 'New Year Clearance', description: 'End-of-year clearance sale for selected products.' },
-    { id: 4, title: 'VIP Customer Exclusive', description: 'A special range for our most loyal customers.' },
-    { id: 5, title: 'Flash Sale', description: 'Limited time offer, valid for 24 hours.' },
-];
-
-
 
 const page = () => {
+    const { ranges } = useRanges();
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredData = useMemo(() => {
-        if (!searchTerm) return initialData;
+        if (!searchTerm) return ranges;
         const lowercasedTerm = searchTerm.toLowerCase();
-        return initialData.filter(item =>
+        return ranges.filter(item =>
             Object.values(item).some(value =>
                 String(value).toLowerCase().includes(lowercasedTerm)
             )
         );
-    }, [searchTerm]);
+    }, [searchTerm, ranges]);
 
     return (
         <div className="h-full dark:bg-gray-850 p-2 flex flex-col gap-6">
             <Ranges_bar 
-                searchTerm={searchTerm} 
+                searchTerm={searchTerm}
                 onSearchChange={setSearchTerm} 
             />
             
