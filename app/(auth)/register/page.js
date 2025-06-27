@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function RegisterPage() {
+    const { isLoaded, signUp, setActive } = useSignUp();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,37 +17,70 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setIsLoading(true);
-
-        // Simple validation
-        if (!name || !email || !password || !confirmPassword) {
-            setError('Please fill in all fields');
-            setIsLoading(false);
-            return;
-        }
+        if (!isLoaded) return;
 
         if (password !== confirmPassword) {
             setError('Passwords do not match');
-            setIsLoading(false);
             return;
         }
 
-        // In a real application, you would make an API call here to register the user.
-        // For this example, we'll just simulate a successful registration.
+        setIsLoading(true);
+        setError('');
 
-        console.log('Registering user:', { name, email });
+        try {
+            // Step 1: Create the user in Clerk
+            const result = await signUp.create({
+                emailAddress: email,
+                password,
+                // You can optionally pass unsafe_metadata to store the name
+                // so Clerk knows about it from the start.
+                unsafeMetadata: {
+                    fullName: name,
+                }
+            });
 
-        // Simulate API delay
-        setTimeout(() => {
-            // On successful registration, you might want to automatically log the user in
-            // or redirect them to the login page with a success message.
-            // We'll redirect to login.
-            alert('Registration successful! Please log in.');
-            router.push('/login');
-        }, 1500);
+            // If sign up is successful, Clerk creates a session.
+            // We can now create the user in our own database.
+            if (result.status === 'complete') {
+                const clerkId = result.createdUserId;
+
+                // Step 2: Call our own API to create the user in MongoDB
+                const apiResponse = await fetch('/api/create-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        clerkId: clerkId,
+                        email: email,
+                        name: name,
+                    }),
+                });
+
+                if (!apiResponse.ok) {
+                    // If our API fails, we have an issue. The user exists in Clerk
+                    // but not in our DB. We should show an error.
+                    throw new Error("Failed to save user data. Please contact support.");
+                }
+
+                // Step 3: Set the session as active and redirect
+                await setActive({ session: result.createdSessionId });
+                router.push('/data'); // Or wherever you want to redirect after registration
+            } else {
+                // This can happen if email verification is required.
+                // For now, we'll treat other states as an error for simplicity.
+                console.log(JSON.stringify(result, null, 2));
+                setError("Registration failed. It's possible email verification is required.");
+            }
+        } catch (err) {
+            // This will catch errors from Clerk (e.g., weak password) or our API call.
+            const errorMessage = err.errors?.[0]?.longMessage || err.message || 'An error occurred during registration.';
+            setError(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
+    // Your JSX remains exactly the same as you provided it.
+    // I've omitted it here for brevity, but you should keep your return (...) block.
     return (
         <div className='dark min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4'>
             <div className='max-w-md w-full p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md'>
@@ -88,7 +123,7 @@ export default function RegisterPage() {
                             id='email'
                             type='email'
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => setEmail(e.targe.value)}
                             className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
                             placeholder='you@example.com'
                         />
