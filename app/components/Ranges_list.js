@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { SquarePen, Trash2, ArrowUp, ArrowDown, Search} from 'lucide-react';
 import My_button from './My_button';
 
@@ -67,7 +68,11 @@ const Ranges_list = ({ data }) => {
                     >
                         {/* Stupac: TITLE - Dodana tamna boja teksta */}
                         <div className="col-span-16 sm:col-span-8 lg:col-span-6">
-                            <p className="text-blue-600 dark:text-blue-400 font-medium truncate">{item.title}</p>
+                            <p className="text-blue-600 dark:text-blue-400 font-medium truncate">
+                                <Link href={`/ranges/edit/${item.id}`}>
+                                    {item.title}
+                                </Link>
+                            </p>
                         </div>
 
                         {/* Stupac: DESCRIPTION - Dodana tamna boja teksta */}
@@ -91,7 +96,9 @@ const Ranges_list = ({ data }) => {
                         {/* Stupac: ACTIONS - Dodane tamne boje za ikone */}
                         <div className="col-span-8 sm:col-span-3 lg:col-span-2 flex justify-end items-center gap-4">
                             <button className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                                <SquarePen size={20} />
+                                <Link href={`/ranges/edit/${item.id}`}>
+                                    <SquarePen size={20} />
+                                </Link>
                             </button>
                             <button className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
                                 <Trash2 size={20} />

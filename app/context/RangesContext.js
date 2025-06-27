@@ -13,7 +13,7 @@ const initialData = [
 ];
 
 // 1. Kreiraj Context
-const RangesContext = createContext();
+const RangesContext = createContext(null);
 
 // 2. Kreiraj Provider komponentu
 export const RangesProvider = ({ children }) => {
@@ -24,7 +24,22 @@ export const RangesProvider = ({ children }) => {
         setRanges(prevRanges => [...prevRanges, newRange]);
     };
 
-    const value = { ranges, addRange };
+    // Funkcija za dohvaćanje jednog "rangea" po ID-u
+    const getRangeById = (id) => {
+        // parseInt je važan jer ID iz URL-a može biti string
+        return ranges.find(range => range.id === parseInt(id));
+    };
+
+    // Funkcija za ažuriranje postojećeg "rangea"
+    const updateRange = (updatedRange) => {
+        setRanges(prevRanges => 
+            prevRanges.map(range => 
+                range.id === updatedRange.id ? updatedRange : range
+            )
+        );
+    };
+
+    const value = { ranges, addRange, getRangeById, updateRange };
 
     return (
         <RangesContext.Provider value={value}>
