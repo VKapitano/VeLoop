@@ -5,11 +5,15 @@ import Link from 'next/link';
 import { SquarePen, Trash2, ArrowUp, ArrowDown, Search} from 'lucide-react';
 import My_button from './My_button';
 
+import { useRanges } from '../context/RangesContext';
+
 const Ranges_list = ({ data }) => {
     // 1. Stanje za sortirane podatke
     const [sortedData, setSortedData] = useState([]);
     // 2. Stanje za smjer sortiranja ('asc' za uzlazno, 'desc' za silazno)
     const [sortDirection, setSortDirection] = useState('asc'); // Po defaultu abecedno
+
+    const { deleteRange } = useRanges();
 
     // 3. Efekt koji sortira podatke kad se promijeni smjer
     useEffect(() => {
@@ -34,6 +38,16 @@ const Ranges_list = ({ data }) => {
     // 4. Funkcija za promjenu smjera sortiranja
     const handleSort = () => {
         setSortDirection(prevDirection => (prevDirection === 'asc' ? 'desc' : 'asc'));
+    };
+
+    const handleDelete = (rangeId, rangeTitle) => {
+        // Prikazujemo alert (confirm prozor) za potvrdu
+        const isConfirmed = window.confirm(`Are you sure you want to delete the range "${rangeTitle}"?`);
+
+        // Ako korisnik potvrdi, pozovi funkciju iz contexta
+        if (isConfirmed) {
+            deleteRange(rangeId);
+        }
     };
 
     return (
@@ -100,7 +114,7 @@ const Ranges_list = ({ data }) => {
                                     <SquarePen size={20} />
                                 </Link>
                             </button>
-                            <button className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+                            <button onClick={() => handleDelete(item.id, item.title)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
                                 <Trash2 size={20} />
                             </button>
                         </div>

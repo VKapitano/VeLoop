@@ -39,7 +39,13 @@ export const RangesProvider = ({ children }) => {
         );
     };
 
-    const value = { ranges, addRange, getRangeById, updateRange };
+    // --- NOVA FUNKCIJA ZA BRISANJE ---
+    const deleteRange = (idToDelete) => {
+        setRanges(prevRanges => prevRanges.filter(range => range.id !== idToDelete));
+    };
+
+    // --- AŽURIRAJ `value` OBJEKT ---
+    const value = { ranges, addRange, getRangeById, updateRange, deleteRange }
 
     return (
         <RangesContext.Provider value={value}>

@@ -4,16 +4,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRanges } from '@/app/context/RangesContext';
-import { ArrowLeft, Search, FileUp, FileDown, Plus, X, SquarePen, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Search, FileUp, FileDown, Plus, X, SquarePen, Trash2, Save, Check, Eraser } from 'lucide-react';
 
 import Ranges_bar from '@/app/components/Ranges_bar';
 import Ranges_list from '@/app/components/Ranges_list';
 import Search_bar from '@/app/components/Search_bar';
 import My_button from '@/app/components/My_button';
 
+
 const RangeForm = ({ mode = 'add', rangeId = null }) => {
     const router = useRouter();
-    const { addRange, getRangeById, updateRange } = useRanges();
+
+    const { addRange, getRangeById, updateRange, deleteRange } = useRanges();
+
 
     // --- LOKALNO STANJE ZA OVU FORMU ---
     // Stanje za Range Details
@@ -31,6 +34,9 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
     const [newItemName, setNewItemName] = useState('');
     const [newItemDesc, setNewItemDesc] = useState('');
     const [newItemEan, setNewItemEan] = useState('0');
+
+    const [editingItemId, setEditingItemId] = useState(null);
+    const [itemsBeforeEdit, setItemsBeforeEdit] = useState(null);
 
     useEffect(() => {
         if (mode === 'edit' && rangeId) {
@@ -101,9 +107,53 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
         router.push('/ranges');
     };
 
+    const handleDelete = () => {
+        // Provjera da smo u edit modu i da imamo ID
+        if (mode === 'edit' && rangeId) {
+            const isConfirmed = window.confirm(`Are you sure you want to permanently delete the range "${rangeTitle}"?`);
+            
+            if (isConfirmed) {
+                deleteRange(parseInt(rangeId));
+                router.push('/ranges'); // Vrati korisnika na listu nakon brisanja
+            }
+        }
+    };
+
     // Briše item iz liste
     const handleDeleteItem = (idToDelete) => {
         setItems(prevItems => prevItems.filter(item => item.id !== idToDelete));
+    };
+
+    // Nove handler funkcije
+
+    // Pokreće edit mod i sprema backup
+    const handleStartEdit = (item) => {
+        setItemsBeforeEdit([...items]); // Spremi trenutnu listu kao backup
+        setEditingItemId(item.id);      // Postavi ID itema koji se uređuje
+    };
+
+    // Sprema promjene (samo izlazi iz edit moda)
+    const handleSaveEdit = () => {
+        setEditingItemId(null);
+        setItemsBeforeEdit(null); // Očisti backup
+    };
+
+    // Otkazuje promjene (vraća backup) i izlazi iz edit moda
+    const handleCancelEdit = () => {
+        if (itemsBeforeEdit) {
+            setItems(itemsBeforeEdit); // Vrati staru listu
+        }
+        setEditingItemId(null);
+        setItemsBeforeEdit(null);
+    };
+
+    // Ažurira podatke itema direktno u `items` listi dok korisnik tipka
+    const handleItemChange = (itemId, field, value) => {
+        setItems(prevItems =>
+            prevItems.map(item =>
+                item.id === itemId ? { ...item, [field]: value } : item
+            )
+        );
     };
 
     return (
@@ -253,19 +303,43 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
 
                             {/* Lista spremljenih itema */}
                             {filteredItems.map(item => (
-                                <div key={item.id} className="grid grid-cols-12 gap-4 items-center px-6 py-2 border-b border-slate-200 dark:border-gray-700">
-                                    <div className="col-span-4 text-gray-800 dark:text-gray-200">{item.name}</div>
-                                    <div className="hidden md:block md:col-span-4 text-gray-600 dark:text-gray-400">{item.description}</div>
-                                    <div className="col-span-4 md:col-span-2 text-gray-800 dark:text-gray-200">{item.ean}</div>
-                                    <div className="col-span-4 md:col-span-2 flex justify-end">
-                                        <button className="p-1.5 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                                                <SquarePen size={20} />
-                                        </button>
-                                        <button className="p-1.5 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors" onClick={() => handleDeleteItem(item.id)}>
-                                            <Trash2 size={20} />
-                                        </button>
+                                editingItemId === item.id ? (
+                                    // --- PRIKAZ U EDIT MODU ---
+                                    <div key={item.id} className="grid grid-cols-12 gap-4 items-center px-6 py-4 bg-blue-50 dark:bg-blue-900/20">
+                                        <div className="col-span-4">
+                                            <input type="text" value={item.name} onChange={(e) => handleItemChange(item.id, 'name', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
+                                        </div>
+                                        <div className="hidden md:block md:col-span-4">
+                                            <input type="text" value={item.description} onChange={(e) => handleItemChange(item.id, 'description', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
+                                        </div>
+                                        <div className="col-span-4 md:col-span-2">
+                                            <input type="number" value={item.ean} onChange={(e) => handleItemChange(item.id, 'ean', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
+                                        </div>
+                                        <div className="col-span-4 md:col-span-2 flex justify-end items-center gap-2">
+                                            <button onClick={handleSaveEdit} className="p-1 text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors">
+                                                <Check size={20} />
+                                            </button>          
+                                            <button onClick={handleCancelEdit} className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+                                                <X size={20} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    // --- STANDARDNI PRIKAZ ---
+                                    <div key={item.id} className="grid grid-cols-12 gap-4 items-center px-6 py-2 border-b border-slate-200 dark:border-gray-700">
+                                        <div className="col-span-4 text-gray-800 dark:text-gray-200">{item.name}</div>
+                                        <div className="hidden md:block md:col-span-4 text-gray-600 dark:text-gray-400">{item.description}</div>
+                                        <div className="col-span-4 md:col-span-2 text-gray-800 dark:text-gray-200">{item.ean}</div>
+                                        <div className="col-span-4 md:col-span-2 flex justify-end items-center gap-2">
+                                            <button onClick={() => handleStartEdit(item)} className="p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                                <SquarePen size={20} />
+                                            </button>
+                                            <button onClick={() => handleDeleteItem(item.id)} className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+                                                <Trash2 size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )
                             ))}
                             
                             {/* Red za unos novog itema */}
@@ -280,11 +354,11 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                     <input type="number" value={newItemEan} onChange={(e) => setNewItemEan(e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                 </div>
                                 <div className="col-span-4 md:col-span-2 flex justify-end items-center gap-2">
-                                    <button onClick={handleAddNewItem} className="p-1.5 hover:bg-green-100 dark:hover:bg-green-900/50">
+                                    <button onClick={handleAddNewItem} className="p-1 text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors">
                                         <Plus size={20} />
                                     </button>                    
-                                    <button onClick={() => { setNewItemName(''); setNewItemDesc(''); setNewItemEan('0'); setShowEditor(false)}} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/50">
-                                        <X size={20} />
+                                    <button onClick={() => { setNewItemName(''); setNewItemDesc(''); setNewItemEan('0'); setShowEditor(false)}} className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+                                        <Eraser size={20} />
                                     </button>
                                 </div>
                             </div>
@@ -304,6 +378,15 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                             <span>Cancel</span>
                         </My_button>
                     </Link>
+                    {mode === 'edit' && (
+                        <My_button 
+                            variant="danger" 
+                            onClick={handleDelete}
+                        >
+                            <Trash2 className="w-5 h-5 mr-2" />
+                            <span>Delete Range</span>
+                        </My_button>
+                    )}
                     <My_button onClick={handleSave} variant="primary">
                         <Save className="w-5 h-5 mr-2" />
                         <span>{mode === 'edit' ? 'Save Changes' : 'Save Range'}</span>
