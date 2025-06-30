@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, FileUp, Filter } from 'lucide-react';
 import My_button from './My_button';
+import FilterSidebar from './FilterSidebar';
 
 // --- MOCK DATA ---
 // Using static mock data as a starting point, as requested.
@@ -23,16 +24,16 @@ const productData = [
 
 const storeData = [
     { society: 'Central', siteKey: 100071, openDate: '30/12/2014', closeDate: '29/11/2024', siteName: 'Store A', salesFloor: 3000 },
-    { society: 'Central', siteKey: 100072, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store B', salesFloor: 2500 },
-    { society: 'Central', siteKey: 100077, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store C', salesFloor: 3000 },
-    { society: 'Central', siteKey: 100078, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store D', salesFloor: 7730 },
-    { society: 'Central', siteKey: 200092, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store E', salesFloor: 7077 },
-    { society: 'Central', siteKey: 200097, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store F', salesFloor: 980 },
-    { society: 'Central', siteKey: 300082, openDate: '30/12/2014', closeDate: '24/01/2020', siteName: 'Store G', salesFloor: 1775 },
-    { society: 'Central', siteKey: 300083, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store H', salesFloor: 2585 },
-    { society: 'Central', siteKey: 300086, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store I', salesFloor: 1946 },
-    { society: 'Central', siteKey: 400080, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store J', salesFloor: 2982 },
-    { society: 'Central', siteKey: 400092, openDate: '30/12/2014', closeDate: '30/12/2999', siteName: 'Store K', salesFloor: 3000 },
+    { society: 'Central', siteKey: 100072, openDate: '30/12/2015', closeDate: '30/12/2025', siteName: 'Store B', salesFloor: 2500 },
+    { society: 'Central', siteKey: 100077, openDate: '30/12/2016', closeDate: '30/12/2026', siteName: 'Store C', salesFloor: 3000 },
+    { society: 'Central', siteKey: 100078, openDate: '30/12/2017', closeDate: '30/12/2027', siteName: 'Store D', salesFloor: 7730 },
+    { society: 'Central', siteKey: 200092, openDate: '30/12/2002', closeDate: '30/12/2006', siteName: 'Store E', salesFloor: 7077 },
+    { society: 'Central', siteKey: 200097, openDate: '30/12/2002', closeDate: '30/12/2007', siteName: 'Store F', salesFloor: 980 },
+    { society: 'Central', siteKey: 300082, openDate: '30/12/2008', closeDate: '24/01/2020', siteName: 'Store G', salesFloor: 1775 },
+    { society: 'Central', siteKey: 300083, openDate: '30/12/2007', closeDate: '30/12/2021', siteName: 'Store H', salesFloor: 2585 },
+    { society: 'Central', siteKey: 300086, openDate: '30/12/2006', closeDate: '30/12/2022', siteName: 'Store I', salesFloor: 1946 },
+    { society: 'Central', siteKey: 400080, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store J', salesFloor: 2982 },
+    { society: 'Central', siteKey: 400092, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store K', salesFloor: 3000 },
 ];
 
 // --- COLUMN DEFINITIONS ---
@@ -54,11 +55,25 @@ const storeColumns = [
     { key: 'salesFloor', label: 'Sales Floor SQ FT' },
 ];
 
+// --- AŽURIRANO: Pomoćna funkcija koja parsira datum u UTC da se izbjegnu problemi s vremenskom zonom ---
+/**
+ * @param {string} dateString - Datum u formatu "DD/MM/YYYY".
+ * @returns {Date|null} - Parsirani Date objekt u UTC ili null ako je format neispravan.
+ */
+const parseDateDDMMYYYY_UTC = (dateString) => {
+    if (!dateString || typeof dateString !== 'string') return null;
+    const parts = dateString.split('/');
+    if (parts.length !== 3) return null;
+    const [day, month, year] = parts.map(Number);
+    // Stvaramo UTC datum kako bismo izbjegli probleme s lokalnom vremenskom zonom.
+    // Date.UTC vraća timestamp, koji onda new Date() pretvara u ispravan UTC Date objekt.
+    return new Date(Date.UTC(year, month - 1, day));
+};
 
 /**
  * Reusable DataTable component
  */
-const DataTable = ({ title, data, columns, dataType }) => {
+const DataTable = ({ title, data, columns, dataType, onFilterClick, isFilterActive }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredData = useMemo(() => {
@@ -138,9 +153,13 @@ const DataTable = ({ title, data, columns, dataType }) => {
                             <FileUp className="w-4 h-4 mr-2" />
                             <span>Export CSV</span>
                         </My_button>
-                        <My_button variant="outline-dark" className="flex flex-1 md:flex-initial">
+                        <My_button 
+                            onClick={onFilterClick} 
+                            variant={isFilterActive ? 'primary' : 'outline-dark'} 
+                            className="flex flex-1 md:flex-initial"
+                        >
                             <Filter className="w-4 h-4 mr-2" />
-                            <span>Filter</span>
+                            <span>Filter{isFilterActive && 's Active'}</span>
                         </My_button>
                     </div>
                 </div>
@@ -180,6 +199,89 @@ const DataTable = ({ title, data, columns, dataType }) => {
 const DataPage = () => {
     const [activeTab, setActiveTab] = useState('products');
 
+    const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [filters, setFilters] = useState({});
+
+    const handleOpenSidebar = () => setSidebarOpen(true);
+    const handleCloseSidebar = () => setSidebarOpen(false);
+
+    const handleApplyFilters = (newFilters) => {
+        setFilters(newFilters);
+        handleCloseSidebar();
+    };
+
+    const handleResetFilters = () => {
+        setFilters({});
+        // Opcionalno, zatvori sidebar nakon reseta
+        // handleCloseSidebar(); 
+    };
+
+    // --- LOGIKA ZA FILTRIRANJE PODATAKA ---
+    const filteredProductData = useMemo(() => {
+        return productData.filter(item => {
+            if (filters.localInd && String(item.localInd) !== filters.localInd) return false;
+            if (filters.metadata && item.metadata !== filters.metadata) return false;
+            return true;
+        });
+    }, [filters]);
+    
+    const filteredStoreData = useMemo(() => {
+        // Ako nema filtera, nema ni filtriranja. Vrati sve.
+        const hasFilters = filters.minSalesFloor || filters.maxSalesFloor || filters.startDate || filters.endDate;
+        if (!hasFilters) {
+            return storeData;
+        }
+
+        return storeData.filter(item => {
+            // 1. Filtriranje po Sales Floor
+            const minSales = parseInt(filters.minSalesFloor, 10);
+            const maxSales = parseInt(filters.maxSalesFloor, 10);
+
+            if (!isNaN(minSales) && item.salesFloor < minSales) {
+                return false; // Ne zadovoljava minimalnu kvadraturu
+            }
+            if (!isNaN(maxSales) && item.salesFloor > maxSales) {
+                return false; // Ne zadovoljava maksimalnu kvadraturu
+            }
+
+            // 2. Filtriranje po datumu (logika "sadržano unutar")
+            const filterStartDate = filters.startDate ? new Date(filters.startDate) : null;
+            const filterEndDate = filters.endDate ? new Date(filters.endDate) : null;
+
+            // Ako je postavljen barem jedan filter za datum, radi provjeru
+            if (filterStartDate || filterEndDate) {
+                const itemOpenDate = parseDateDDMMYYYY_UTC(item.openDate);
+                const itemCloseDate = parseDateDDMMYYYY_UTC(item.closeDate);
+                
+                // Ako trgovina nema ispravne datume, ne može proći filter
+                if (!itemOpenDate || !itemCloseDate) {
+                    return false;
+                }
+
+                // --- IZMIJENJENA LOGIKA ---
+                // Primjenjuje se logika "sadržano unutar raspona filtera"
+
+                // Uvjet 1: Datum otvaranja trgovine mora biti NAKON ili ISTI KAO početak filtera.
+                // Ako je filterStartDate postavljen i datum otvaranja je PRIJE, izbaci.
+                if (filterStartDate && itemOpenDate < filterStartDate) {
+                    return false;
+                }
+
+                // Uvjet 2: Datum zatvaranja trgovine mora biti PRIJE ili ISTI KAO kraj filtera.
+                // Ako je filterEndDate postavljen i datum zatvaranja je NAKON, izbaci.
+                if (filterEndDate && itemCloseDate > filterEndDate) {
+                    return false;
+                }
+            }
+            
+            // Ako je stavka prošla sve provjere, zadrži je u filtriranom nizu
+            return true;
+        });
+    }, [filters]);
+    
+    // Provjera jesu li filteri aktivni
+    const isFilterActive = Object.keys(filters).length > 0;
+
     return (
         <div className="w-full">
             <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
@@ -209,20 +311,32 @@ const DataPage = () => {
                 {activeTab === 'products' && (
                     <DataTable
                         title="Products Data"
-                        data={productData}
+                        data={filteredProductData}
                         columns={productColumns}
                         dataType="products"
+                        onFilterClick={handleOpenSidebar}
+                        isFilterActive={isFilterActive}
                     />
                 )}
                 {activeTab === 'stores' && (
                     <DataTable
                         title="Stores Data"
-                        data={storeData}
+                        data={filteredStoreData}
                         columns={storeColumns}
                         dataType="stores"
+                        onFilterClick={handleOpenSidebar}
+                        isFilterActive={isFilterActive}
                     />
                 )}
             </div>
+            <FilterSidebar 
+                isOpen={isSidebarOpen}
+                onClose={handleCloseSidebar}
+                onApply={handleApplyFilters}
+                onReset={handleResetFilters}
+                dataType={activeTab}
+                initialFilters={filters}
+            />
         </div>
     );
 };
