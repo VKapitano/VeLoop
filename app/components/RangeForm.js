@@ -122,8 +122,60 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
     };
 
     // Briše item iz liste
-    const handleDeleteItem = (idToDelete) => {
-        setItems(prevItems => prevItems.filter(item => item.id !== idToDelete));
+    const handleDeleteItem = (idToDelete, itemName) => {
+        // Prikazujemo alert (confirm prozor) za potvrdu
+        const isConfirmed = window.confirm(`Are you sure you want to delete the item "${itemName}"?`);
+
+        // Ako korisnik potvrdi, izvrši brisanje
+        if (isConfirmed) {
+            setItems(prevItems => prevItems.filter(item => item.id !== idToDelete));
+        }
+    };
+
+    const handleExportItems = () => {
+        // Provjeri ima li uopće itema za eksport
+        if (items.length === 0) {
+            alert("There are no items to export.");
+            return;
+        }
+
+        // 1. Definiraj zaglavlja stupaca
+        const headers = ['ITEM NAME', 'DESCRIPTION', 'EAN CODE'];
+        const csvRows = [headers.join(',')]; // Prvi redak je zaglavlje
+
+        // 2. Prođi kroz svaki item i formatiraj ga za CSV redak
+        items.forEach(item => {
+            // Važno: Osiguraj da vrijednosti koje mogu sadržavati zarez budu unutar navodnika
+            const name = `"${item.name.replace(/"/g, '""')}"`;
+            const description = `"${item.description.replace(/"/g, '""')}"`;
+            const ean = item.ean;
+
+            csvRows.push([name, description, ean].join(','));
+        });
+
+        // 3. Spoji sve retke u jedan string, s novim redom kao separatorom
+        const csvContent = csvRows.join('\n');
+
+        // 4. Kreiraj Blob i link za preuzimanje
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        
+        // Kreiraj privremeni link element
+        const link = document.createElement('a');
+        if (link.href) {
+            URL.revokeObjectURL(link.href);
+        }
+        link.href = URL.createObjectURL(blob);
+        
+        // Postavi ime datoteke (koristimo naslov rangea ako postoji)
+        const fileName = rangeTitle.trim() ? `${rangeTitle}_items.csv` : 'range_items.csv';
+        link.setAttribute('download', fileName);
+
+        // Simuliraj klik na link da se pokrene preuzimanje
+        document.body.appendChild(link);
+        link.click();
+
+        // Ukloni privremeni link iz DOM-a
+        document.body.removeChild(link);
     };
 
     // Nove handler funkcije
@@ -347,11 +399,11 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                 <Search className="w-4 h-4 mr-2" />
                                 <span>EAN Check</span>
                             </My_button>
-                            <My_button variant="outline-dark">
+                            {/* <My_button variant="outline-dark">
                                 <FileUp className="w-4 h-4 mr-2" />
                                 <span>Import</span>
-                            </My_button>
-                            <My_button variant="outline-dark">
+                            </My_button> */}
+                            <My_button variant="outline-dark" onClick={handleExportItems}>
                                 <FileDown className="w-4 h-4 mr-2" />
                                 <span>Export</span>
                             </My_button>
@@ -393,16 +445,16 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                     // --- PRIKAZ U EDIT MODU ---
                                     // Dodajemo `rowClass` i `transition-colors` na glavni div
                                     <div key={item.id} className={`grid grid-cols-12 gap-4 items-center px-6 py-4 ${rowClass} transition-colors duration-300`}>
-                                        <div className="col-span-4">
+                                        <div className="col-span-6 md:col-span-4">
                                             <input type="text" value={item.name} onChange={(e) => handleItemChange(item.id, 'name', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                         </div>
                                         <div className="hidden md:block md:col-span-4">
                                             <input type="text" value={item.description} onChange={(e) => handleItemChange(item.id, 'description', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                         </div>
-                                        <div className="col-span-4 md:col-span-2">
+                                        <div className="col-span-3 md:col-span-2">
                                             <input type="number" value={item.ean} onChange={(e) => handleItemChange(item.id, 'ean', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                         </div>
-                                        <div className="col-span-4 md:col-span-2 flex justify-end items-center gap-2">
+                                        <div className="col-span-3 md:col-span-2 flex justify-end items-center gap-2">
                                             <button onClick={handleSaveEdit} className="p-1 text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors">
                                                 <Check size={20} />
                                             </button>          
@@ -422,7 +474,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                             <button onClick={() => handleStartEdit(item)} className="p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
                                                 <SquarePen size={20} />
                                             </button>
-                                            <button onClick={() => handleDeleteItem(item.id)} className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+                                            <button onClick={() => handleDeleteItem(item.id, item.name)} className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
                                                 <Trash2 size={20} />
                                             </button>
                                         </div>
