@@ -15,7 +15,7 @@ import My_button from '@/app/components/My_button';
 const RangeForm = ({ mode = 'add', rangeId = null }) => {
     const router = useRouter();
 
-    const { addRange, getRangeById, updateRange, deleteRange } = useRanges();
+    const { ranges, addRange, getRangeById, updateRange, deleteRange } = useRanges();
 
 
     // --- LOKALNO STANJE ZA OVU FORMU ---
@@ -37,6 +37,8 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
 
     const [editingItemId, setEditingItemId] = useState(null);
     const [itemsBeforeEdit, setItemsBeforeEdit] = useState(null);
+
+    const [eanStatuses, setEanStatuses] = useState(null);
 
     useEffect(() => {
         if (mode === 'edit' && rangeId) {
@@ -156,6 +158,80 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
         );
     };
 
+    // --- NOVA FUNKCIJA ZA PROVJERU EAN KODOVA ---
+    const handleEanCheck = () => {
+        // Ako su statusi već postavljeni, resetiraj ih i izađi iz funkcije
+        if (eanStatuses) {
+            setEanStatuses(null);
+            return;
+        }
+
+        // --- Ostatak logike se izvršava samo ako je eanStatuses null ---
+        console.log(`--- Starting EAN Check for Each Item in Range: "${rangeTitle || 'New Range'}" ---`);
+        let anyDuplicatesFound = false;
+        
+        const currentItems = items;
+
+        // KORAK 1: Iteriraj kroz SVAKI item u trenutnoj formi da za njega nađemo duplikate.
+        currentItems.forEach(itemToCheck => {
+            const ean = itemToCheck.ean;
+
+            console.log(`- Checking for duplicates of item: "${itemToCheck.name}" (EAN: ${ean})`);
+            const locationsOfDuplicates = [];
+
+            // KORAK 2: Tražimo duplikate unutar TRENUTNE LISTE
+            const localEanCounts = {};
+            items.forEach(item => {
+                const ean = String(item.ean);
+                if (ean && ean !== '0') {
+                    localEanCounts[ean] = (localEanCounts[ean] || 0) + 1;
+                }
+            });
+
+            // KORAK 3: Tražimo duplikate u SVIM OSTALIM spremljenim rangeovima
+            const otherRanges = ranges.filter(r => mode === 'add' || r.id !== parseInt(rangeId));
+            const globalEanSet = new Set();
+            otherRanges.forEach(range => {
+                (range.items || []).forEach(item => {
+                    if (item.ean) {
+                        globalEanSet.add(String(item.ean));
+                    }
+                });
+            });
+
+            // KORAK 4: Ispisujemo izvještaj za TRENUTNI item koji provjeravamo
+            if (locationsOfDuplicates.length > 0) {
+                anyDuplicatesFound = true; // Zabilježi da je barem jedan duplikat pronađen ukupno
+                console.warn(`  ⚠️ Found ${locationsOfDuplicates.length} duplicate(s) for this item:`);
+                locationsOfDuplicates.forEach(loc => {
+                    console.log(`    - Item: "${loc.itemName}" (ID: ${loc.itemId}) in Range: "${loc.rangeTitle}"`);
+                });
+            } else {
+                console.log(`  ✅ No duplicates found for this item.`);
+            }
+            console.log('--------------------');
+            // odredi status za svaki
+            const newStatuses = {};
+            items.forEach(item => {
+                const ean = String(item.ean);
+                
+                const isLocalDuplicate = localEanCounts[ean] > 1;
+                const isGlobalDuplicate = globalEanSet.has(ean);
+
+                newStatuses[item.id] = isLocalDuplicate || isGlobalDuplicate;
+            });
+
+            setEanStatuses(newStatuses);
+        });
+
+        // KORAK 5: Završni sažetak
+        if (!anyDuplicatesFound) {
+            console.log("✅ Overall Result: No EAN duplicates were found for any item in this list.");
+        }
+
+        console.log('--- EAN Check Complete ---');
+    };
+
     return (
         // 1. Glavni kontejner - isti kao na /ranges stranici
         <div className="h-full dark:bg-gray-850 p-2 flex flex-col gap-6">
@@ -267,7 +343,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                     <div className="flex flex-wrap lg:flex-row items-center gap-2 w-full lg:w-auto">
                         <Search_bar searchTerm={itemSearchTerm} onSearchChange={setItemSearchTerm} placeholder_text={"Search items..."}/>
                         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                            <My_button variant="outline-dark">
+                            <My_button variant="outline-dark" onClick={handleEanCheck}>
                                 <Search className="w-4 h-4 mr-2" />
                                 <span>EAN Check</span>
                             </My_button>
@@ -302,10 +378,21 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                             </div>
 
                             {/* Lista spremljenih itema */}
-                            {filteredItems.map(item => (
-                                editingItemId === item.id ? (
+                            {filteredItems.map(item => {
+                                // 1. Dohvati status (true, false, ili undefined) iz `eanStatuses` stanja
+                                const hasDuplicate = eanStatuses ? eanStatuses[item.id] : undefined;
+                                
+                                // 2. Odredi klasu za boju na temelju statusa
+                                const rowClass = 
+                                    hasDuplicate === true ? 'bg-red-50 dark:bg-red-900/30' :      // Crvena za duplikate
+                                    hasDuplicate === false ? 'bg-green-50 dark:bg-green-900/30' : // Zelena za ispravne
+                                    '';                                                           // Bez boje ako provjera nije aktivna
+
+                                // 3. Vrati JSX s dinamički dodanom klasom
+                                return editingItemId === item.id ? (
                                     // --- PRIKAZ U EDIT MODU ---
-                                    <div key={item.id} className="grid grid-cols-12 gap-4 items-center px-6 py-4 bg-blue-50 dark:bg-blue-900/20">
+                                    // Dodajemo `rowClass` i `transition-colors` na glavni div
+                                    <div key={item.id} className={`grid grid-cols-12 gap-4 items-center px-6 py-4 ${rowClass} transition-colors duration-300`}>
                                         <div className="col-span-4">
                                             <input type="text" value={item.name} onChange={(e) => handleItemChange(item.id, 'name', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                         </div>
@@ -326,7 +413,8 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                     </div>
                                 ) : (
                                     // --- STANDARDNI PRIKAZ ---
-                                    <div key={item.id} className="grid grid-cols-12 gap-4 items-center px-6 py-2 border-b border-slate-200 dark:border-gray-700">
+                                    // Dodajemo `rowClass` i `transition-colors` i ovdje
+                                    <div key={item.id} className={`grid grid-cols-12 gap-4 items-center px-6 py-2 border-b border-slate-200 dark:border-gray-700 ${rowClass} transition-colors duration-300`}>
                                         <div className="col-span-4 text-gray-800 dark:text-gray-200">{item.name}</div>
                                         <div className="hidden md:block md:col-span-4 text-gray-600 dark:text-gray-400">{item.description}</div>
                                         <div className="col-span-4 md:col-span-2 text-gray-800 dark:text-gray-200">{item.ean}</div>
@@ -339,8 +427,8 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                             </button>
                                         </div>
                                     </div>
-                                )
-                            ))}
+                                );
+                            })}
                             
                             {/* Red za unos novog itema */}
                             <div className="grid grid-cols-12 gap-4 items-center px-6 py-4 bg-slate-50 dark:bg-gray-900/50">
