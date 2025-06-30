@@ -55,3 +55,39 @@ export async function PUT(request, { params }) {
         return new NextResponse("Internal Server Error", { status: 500 });
     }
 }
+
+export async function DELETE(request, { params }) {
+    // A security check for an 'admin' role is absolutely necessary for a delete operation.
+    const { userId } = await auth();
+    const client = await clerkClient();
+    const curUser = await client.users.getUser(userId);
+    if (curUser?.privateMetadata?.role?.toLowerCase() !== 'admin') {
+        return NextResponse.json({ error: "Unauthorized: You don't have permission to perform this action." }, { status: 403 });
+    }
+
+    try {
+        // Get the user ID from the URL parameters.
+        const { id } = params;
+        if (userId === id) {
+            return NextResponse.json({ error: "You can not delete yoursefl in user managment" }, { status: 405 })
+        }
+        if (!id) {
+            return NextResponse.json({ error: 'User ID is required.' }, { status: 400 });
+        }
+
+        // Use the Clerk Backend SDK to delete the user.
+        await client.users.deleteUser(id);
+
+        // Return a success response.
+        return NextResponse.json({ success: true, message: 'User deleted successfully.' }, { status: 200 });
+
+    } catch (error) {
+        console.error('Error deleting user from Clerk:', error);
+        // Handle specific errors from Clerk, like if the user is not found.
+        if (error.status === 404) {
+            return NextResponse.json({ error: 'User not found in Clerk.' }, { status: 404 });
+        }
+        // Return a generic server error for other issues.
+        return NextResponse.json({ error: 'An internal server error occurred while deleting the user.' }, { status: 500 });
+    }
+}

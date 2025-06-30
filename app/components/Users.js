@@ -81,9 +81,36 @@ const Users = () => {
     };
 
     const handleConfirmDelete = async () => {
-        // This will be implemented when we build the DELETE API endpoint.
-        console.log("Delete functionality to be added.");
-        handleCancelDelete();
+        if (!userToDelete) return; // Safety check
+
+        try {
+            // --- ADDED ---
+            // This sends the DELETE request to your new backend endpoint
+            const response = await fetch(`/api/users/${userToDelete.id}`, {
+                method: 'DELETE',
+            });
+
+            // --- ADDED ---
+            // This checks if the deletion was successful and shows an error if not
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete the user.');
+            }
+
+            // --- MOVED & KEPT ---
+            // This still runs, but now only after a successful deletion
+            handleCancelDelete();
+
+            // --- ADDED ---
+            // This refreshes the user list in the UI to remove the deleted user
+            fetchUsers();
+
+        } catch (err) {
+            // --- ADDED ---
+            // This shows any errors to you in an alert pop-up
+            console.error(err);
+            alert('Error: ' + err.message);
+        }
     };
 
     const handleCancelDelete = () => {
