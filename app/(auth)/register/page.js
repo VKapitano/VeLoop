@@ -38,8 +38,8 @@ export default function RegisterPage() {
                 emailAddress: email,
                 password: password,
                 // Here we add the default metadata for every new user.
-                publicMetadata: { status: 'active' },
-                privateMetadata: { role: 'Viewer' }
+
+                unsafeMetadata: { status: 'active', role: 'Viewer' },
             });
 
             // Check the result of the sign-up attempt.
