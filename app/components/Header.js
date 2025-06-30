@@ -5,7 +5,7 @@ import coopLogo from '../(content)/img/logo/logo.png';
 import Link from 'next/link';
 
 import { UserCircle, ChevronDown, LogOut } from 'lucide-react'; // <-- Import LogOut icon
-import { logout } from '../actions'; // <-- testni način za logout
+/* import { logout } from '../actions'; // <-- testni način za logout */
 
 const User_button = ({ username }) => {
     return (
@@ -42,7 +42,7 @@ const Header = ({ title, username, onLogout }) => {
                 {/* Gumb za korisnički profil */}
                 <User_button username={username} />
                 {/* FIX: Logout button now shows an icon on mobile and text on larger screens */}
-                <My_button onClick={() => logout()} variant="danger">
+                <My_button onClick={onLogout} variant="danger">
                     <span className="sm:hidden">
                         <LogOut size={20} />
                     </span>

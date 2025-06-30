@@ -1,3 +1,4 @@
+// app/(auth)/register/page.js
 'use client';
 
 import { useState } from 'react';
@@ -17,10 +18,13 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!isLoaded) return;
+        if (!isLoaded) {
+            // Clerk's hook is not ready yet, do nothing.
+            return;
+        }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            setError('Passwords do not match.');
             return;
         }
 
@@ -28,59 +32,40 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            // Step 1: Create the user in Clerk
+            // Let Clerk's useSignUp hook handle the entire process.
+            // It will automatically manage the CAPTCHA challenge for you.
             const result = await signUp.create({
                 emailAddress: email,
-                password,
-                // You can optionally pass unsafe_metadata to store the name
-                // so Clerk knows about it from the start.
-                unsafeMetadata: {
-                    fullName: name,
-                }
+                password: password,
+                // Here we add the default metadata for every new user.
+                publicMetadata: { status: 'active' },
+                privateMetadata: { role: 'Viewer' }
             });
 
-            // If sign up is successful, Clerk creates a session.
-            // We can now create the user in our own database.
+            // Check the result of the sign-up attempt.
             if (result.status === 'complete') {
-                const clerkId = result.createdUserId;
-
-                // Step 2: Call our own API to create the user in MongoDB
-                const apiResponse = await fetch('/api/create-user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        clerkId: clerkId,
-                        email: email,
-                        name: name,
-                    }),
-                });
-
-                if (!apiResponse.ok) {
-                    // If our API fails, we have an issue. The user exists in Clerk
-                    // but not in our DB. We should show an error.
-                    throw new Error("Failed to save user data. Please contact support.");
-                }
-
-                // Step 3: Set the session as active and redirect
+                // This means sign-up was successful and the user is now signed in.
+                // Set the active session and redirect them to the main app.
                 await setActive({ session: result.createdSessionId });
-                router.push('/data'); // Or wherever you want to redirect after registration
+                router.push('/data');
             } else {
-                // This can happen if email verification is required.
-                // For now, we'll treat other states as an error for simplicity.
-                console.log(JSON.stringify(result, null, 2));
-                setError("Registration failed. It's possible email verification is required.");
+                // This can happen if you have email verification enabled in Clerk.
+                // The user is created but needs to verify their email before signing in.
+                console.log("Sign-up status:", result.status, result);
+                // A good UX is to tell the user to check their email.
+                alert("Registration successful! Please check your email to verify your account before logging in.");
+                router.push('/login');
             }
         } catch (err) {
-            // This will catch errors from Clerk (e.g., weak password) or our API call.
-            const errorMessage = err.errors?.[0]?.longMessage || err.message || 'An error occurred during registration.';
+            // This will catch any errors from Clerk, such as "user already exists" or "invalid password".
+            const errorMessage = err.errors?.[0]?.longMessage || 'An error occurred during registration.';
             setError(errorMessage);
+            console.error("Clerk sign-up error:", JSON.stringify(err, null, 2));
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Your JSX remains exactly the same as you provided it.
-    // I've omitted it here for brevity, but you should keep your return (...) block.
     return (
         <div className='dark min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4'>
             <div className='max-w-md w-full p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md'>
@@ -123,7 +108,7 @@ export default function RegisterPage() {
                             id='email'
                             type='email'
                             value={email}
-                            onChange={(e) => setEmail(e.targe.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                             className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
                             placeholder='you@example.com'
                         />

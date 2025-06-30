@@ -1,54 +1,54 @@
-import { NextResponse } from 'next/server';
-import { getCollection } from '@/lib/db'; // Make sure the path to your db.js is correct
-import { auth } from '@clerk/nextjs/server';
+// app/api/create-user/route.js
+/*
+import { clerkClient } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 export async function POST(request) {
-    // 1. Check if the request is coming from an authenticated user.
-    // This is a crucial security check. The user must have just signed up
-    // and have an active session to create their DB record.
-    const { userId, getToken } = auth();
-    if (!userId) {
-        return new NextResponse("Unauthorized: No user ID found.", { status: 401 });
-    }
-
-    // 2. Get the data sent from the registration page.
-    const { email, name, clerkId } = await request.json();
-
-    // 3. A second security check: Does the clerkId from the request body
-    //    match the clerkId of the authenticated user making this request?
-    if (userId !== clerkId) {
-        return new NextResponse("Forbidden: Mismatched user ID.", { status: 403 });
-    }
-
-    // 4. Connect to the database and insert the new user.
     try {
-        const usersCollection = await getCollection('users');
-        if (!usersCollection) {
-            return new NextResponse("Database connection failed.", { status: 500 });
+        // Parse the request body
+        const { email, password } = await request.json();
+
+        // Basic validation
+        if (!email || !password) {
+            return NextResponse.json(
+                { error: "Email and password are required." },
+                { status: 400 }
+            );
+        }
+        const client = await clerkClient();
+        // Create the user in Clerk
+        const newUser = await client.users.createUser({
+            emailAddress: [email],
+            password: password // This will be hashed automatically by Clerk
+            // You can add other properties here, like publicMetadata
+        });
+
+        // You can optionally do something with the newUser object here,
+        // like adding them to your own database.
+
+        // Return a success response
+        return NextResponse.json(
+            { message: "User created successfully", user: newUser },
+            { status: 201 } // 201 Created
+        );
+
+    } catch (error) {
+        console.log(error)
+        // Log the full error for debugging
+        console.error("Error creating user:", JSON.stringify(error, null, 2));
+
+        // Handle specific Clerk errors
+        if (error.errors) {
+            const clerkError = error.errors[0];
+            // e.g., "Email address is taken."
+            return NextResponse.json({ error: clerkError.longMessage || "An error occurred." }, { status: 422 }); // 422 Unprocessable Entity
         }
 
-        // Check if user already exists in our DB to prevent duplicates
-        const existingUser = await usersCollection.findOne({ clerkId: clerkId });
-        if (existingUser) {
-            return NextResponse.json({ message: "User already exists in DB." }, { status: 200 });
-        }
-
-        const newUserDocument = {
-            clerkId: clerkId,
-            email: email,
-            name: name,
-            role: 'Viewer', // Set a default role for all new users
-            status: 'Active', // Set a default status
-            lastLogin: new Date(),
-        };
-
-        const result = await usersCollection.insertOne(newUserDocument);
-
-        console.log(`Successfully created user in MongoDB with ID: ${result.insertedId}`);
-        return NextResponse.json({ message: "User created successfully in DB", user: newUserDocument }, { status: 201 });
-
-    } catch (err) {
-        console.error("Error creating user in MongoDB:", err);
-        return new NextResponse("Internal Server Error.", { status: 500 });
+        // Handle generic errors
+        return NextResponse.json(
+            { error: "An unexpected error occurred." },
+            { status: 500 }
+        );
     }
 }
+    */

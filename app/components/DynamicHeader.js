@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation'; // <-- Next.js hook za čitanje URL-a
-import { signOut } from 'next-auth/react'; // <-- ozbiljniji način za logout
+/* import { signOut } from 'next-auth/react'; // <-- ozbiljniji način za logout */
+import { useClerk } from '@clerk/nextjs'; // <-- Importiramo Clerk hook za odjavu
+
 
 import Header from './Header';
 
@@ -10,6 +12,7 @@ import Header from './Header';
 const DynamicHeader = ({ username }) => {
     const pathname = usePathname(); // Dohvaća trenutnu putanju, npr. "/data"
     const [title, setTitle] = useState('');
+    const { signOut } = useClerk(); // <-- Dohvaćamo signOut funkciju iz Clerka
 
     // Efekt koji se pokreće svaki put kad se promijeni URL (pathname)
     useEffect(() => {
@@ -30,6 +33,7 @@ const DynamicHeader = ({ username }) => {
         // Poziv NextAuth funkcije za odjavu.
         // Ona će očistiti kolačić i preusmjeriti korisnika.
         // signOut({ callbackUrl: '/login' }); // <-- Možete specificirati gdje da preusmjeri korisnika nakon odjave
+        signOut({ redirectUrl: '/login' });
     };
 
     // Renderira originalnu "glupu" Header komponentu s dinamičkim naslovom
