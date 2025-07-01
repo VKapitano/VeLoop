@@ -513,11 +513,19 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
 
                 {/* Footer s gumbima */}
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end items-center gap-4">
-                    <Link href="/ranges">
-                        <My_button variant="outline-dark">
-                            <span>Cancel</span>
-                        </My_button>
-                    </Link>
+                    <My_button 
+                    variant="outline-dark"
+                    onClick={() => {
+                        // Prikazujemo prozor za potvrdu
+                        const isConfirmed = window.confirm('Are you sure you want to cancel? All unsaved changes will be lost.');
+                        // Ako korisnik potvrdi, preusmjeri ga
+                        if (isConfirmed) {
+                            router.push('/ranges');
+                        }
+                    }}
+                    >
+                        <span>Cancel</span>
+                    </My_button>
                     {mode === 'edit' && (
                         <My_button 
                             variant="danger" 
