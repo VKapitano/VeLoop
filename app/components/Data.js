@@ -188,7 +188,7 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
         return value;
     };
 
-        {/*const renderCell = (item, column) => {
+    {/*const renderCell = (item, column) => {
             const value = item[column.key];
             if (dataType === 'stores' && (column.key === 'openDate' || column.key === 'closeDate')) {
                 return (
@@ -236,9 +236,9 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                             <FileUp className="w-4 h-4 mr-2" />
                             <span>Export CSV</span>
                         </My_button>
-                        <My_button 
-                            onClick={onFilterClick} 
-                            variant={isFilterActive ? 'primary' : 'outline-dark'} 
+                        <My_button
+                            onClick={onFilterClick}
+                            variant={isFilterActive ? 'primary' : 'outline-dark'}
                             className="flex flex-1 md:flex-initial"
                         >
                             <Filter className="w-4 h-4 mr-2" />
@@ -330,7 +330,7 @@ const DataPage = () => {
             return true;
         });
     }, [filters]);
-    
+
     const filteredStoreData = useMemo(() => {
         // Ako nema filtera, nema ni filtriranja. Vrati sve.
         const hasFilters = filters.minSalesFloor || filters.maxSalesFloor || filters.startDate || filters.endDate;
@@ -358,7 +358,7 @@ const DataPage = () => {
             if (filterStartDate || filterEndDate) {
                 const itemOpenDate = parseDateDDMMYYYY_UTC(item.openDate);
                 const itemCloseDate = parseDateDDMMYYYY_UTC(item.closeDate);
-                
+
                 // Ako trgovina nema ispravne datume, ne može proći filter
                 if (!itemOpenDate || !itemCloseDate) {
                     return false;
@@ -379,12 +379,12 @@ const DataPage = () => {
                     return false;
                 }
             }
-            
+
             // Ako je stavka prošla sve provjere, zadrži je u filtriranom nizu
             return true;
         });
     }, [filters]);
-    
+
     // Provjera jesu li filteri aktivni
     const isFilterActive = Object.keys(filters).length > 0;
 
@@ -437,7 +437,7 @@ const DataPage = () => {
                     />
                 )}
             </div>
-            <FilterSidebar 
+            <FilterSidebar
                 isOpen={isSidebarOpen}
                 onClose={handleCloseSidebar}
                 onApply={handleApplyFilters}
