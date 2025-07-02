@@ -16,7 +16,7 @@ const UserSidebar = ({ isOpen, mode, user, onClose, onSave }) => {
             setFormData({
                 id: user.id,
                 status: user.publicMetadata.status,
-                role: user.publicMetadata.role
+                role: user.privateMetadata?.role || 'Viewer'
             });
         } else {
             // Default state for 'add' mode
