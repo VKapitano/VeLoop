@@ -2,46 +2,61 @@
 'use client';
 
 import { useState } from 'react';
+import { useSignIn } from '@clerk/nextjs'; // Import useSignIn from Clerk
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
+  // Use the Clerk hook
+  const { isLoaded, signIn, setActive } = useSignIn();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // For testing, use these credentials:
-  // email: test@example.com
-  // password: password123
+  // This is the only part that changes.
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    // Simple validation
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      setIsLoading(false);
+    if (!isLoaded) {
+      // Clerk's hook is not ready yet, do nothing.
       return;
     }
 
-    // For testing purposes - hardcoded credentials
-    if (email === 'test@example.com' && password === 'password123') {
-      // Set a test cookie for auth
-      document.cookie = 'auth-test=true; path=/';
+    setError('');
+    setIsLoading(true);
 
-      // Simulate API delay
-      setTimeout(() => {
+    try {
+      // Step 1: Start the sign-in process with Clerk
+      const result = await signIn.create({
+        identifier: email, // 'identifier' can be email or username
+        password,
+      });
+
+      // Step 2: Check the result status
+      if (result.status === 'complete') {
+        // If sign-in is complete, set the active session for the user
+        await setActive({ session: result.createdSessionId });
+        // And redirect them to the dashboard or main page
         router.push('/data');
-      }, 1000);
-    } else {
-      setError('Invalid email or password');
+      } else {
+        // This can happen for cases like multi-factor authentication.
+        // For this simple case, we'll log it and show a generic error.
+        console.log(JSON.stringify(result, null, 2));
+        setError('Something went wrong during login. Please try again.');
+      }
+    } catch (err) {
+      // This will catch any errors from Clerk, such as "invalid password"
+      const errorMessage = err.errors?.[0]?.longMessage || 'Invalid email or password.';
+      setError(errorMessage);
+    } finally {
       setIsLoading(false);
     }
   };
 
+  // Your JSX (the return statement) stays exactly the same.
+  // I have omitted it for brevity. Just replace the handleSubmit function.
   return (
     <div className='dark min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4'>
       <div className='max-w-md w-full p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md'>
@@ -136,7 +151,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Testing info */}
+        {/* You can now safely remove this testing info box! */}
         <div className='mt-8 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-md text-sm dark:text-gray-300'>
           <p className='font-medium'>For testing, use these credentials:</p>
           <p>Email: test@example.com</p>

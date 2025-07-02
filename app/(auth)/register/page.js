@@ -1,10 +1,13 @@
+// app/(auth)/register/page.js
 'use client';
 
 import { useState } from 'react';
+import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function RegisterPage() {
+    const { isLoaded, signUp, setActive } = useSignUp();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,35 +18,52 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setIsLoading(true);
-
-        // Simple validation
-        if (!name || !email || !password || !confirmPassword) {
-            setError('Please fill in all fields');
-            setIsLoading(false);
+        if (!isLoaded) {
+            // Clerk's hook is not ready yet, do nothing.
             return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            setIsLoading(false);
+            setError('Passwords do not match.');
             return;
         }
 
-        // In a real application, you would make an API call here to register the user.
-        // For this example, we'll just simulate a successful registration.
+        setIsLoading(true);
+        setError('');
 
-        console.log('Registering user:', { name, email });
+        try {
+            // Let Clerk's useSignUp hook handle the entire process.
+            // It will automatically manage the CAPTCHA challenge for you.
+            const result = await signUp.create({
+                emailAddress: email,
+                password: password,
+                // Here we add the default metadata for every new user.
 
-        // Simulate API delay
-        setTimeout(() => {
-            // On successful registration, you might want to automatically log the user in
-            // or redirect them to the login page with a success message.
-            // We'll redirect to login.
-            alert('Registration successful! Please log in.');
-            router.push('/login');
-        }, 1500);
+                unsafeMetadata: { status: 'active', role: 'Viewer' },
+            });
+
+            // Check the result of the sign-up attempt.
+            if (result.status === 'complete') {
+                // This means sign-up was successful and the user is now signed in.
+                // Set the active session and redirect them to the main app.
+                await setActive({ session: result.createdSessionId });
+                router.push('/data');
+            } else {
+                // This can happen if you have email verification enabled in Clerk.
+                // The user is created but needs to verify their email before signing in.
+                console.log("Sign-up status:", result.status, result);
+                // A good UX is to tell the user to check their email.
+                alert("Registration successful! Please check your email to verify your account before logging in.");
+                router.push('/login');
+            }
+        } catch (err) {
+            // This will catch any errors from Clerk, such as "user already exists" or "invalid password".
+            const errorMessage = err.errors?.[0]?.longMessage || 'An error occurred during registration.';
+            setError(errorMessage);
+            console.error("Clerk sign-up error:", JSON.stringify(err, null, 2));
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

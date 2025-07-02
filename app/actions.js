@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 export async function logout() {
   // Brisanje kolačića
   cookies().delete('auth-test');
-  
+
   // Preusmjeravanje na login stranicu
   redirect('/login');
 }

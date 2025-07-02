@@ -135,7 +135,7 @@ const Sidenav = () => {
                                     {isDarkMode ? <Sun size={24} className="flex-shrink-0" /> : <Moon size={24} className="flex-shrink-0" />}
                                 </div>
                                 <span className="whitespace-nowrap transition-opacity duration-300 lg:w-0 lg:opacity-0 group-hover:lg:w-auto group-hover:lg:opacity-100">
-                                    {isDarkMode ? 'Svetli Režim' : 'Tamni Režim'}
+                                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
                                 </span>
                             </div>
                         </li>

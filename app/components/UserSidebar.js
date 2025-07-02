@@ -3,18 +3,26 @@ import { X } from 'lucide-react';
 
 const UserSidebar = ({ isOpen, mode, user, onClose, onSave }) => {
     // Internal state to manage form fields
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState({
+        id: "id",
+        role: 'Admin', // Default role
+        status: 'Active', // Default status
+    });
 
     // When the component opens or the user being edited changes, update the form data
     useEffect(() => {
+        console.log(user)
         if (mode === 'edit' && user) {
-            setFormData(user);
+            setFormData({
+                id: user.id,
+                status: user.publicMetadata.status,
+                role: user.publicMetadata.role
+            });
         } else {
             // Default state for 'add' mode
             setFormData({
-                email: '',
-                password: '',
-                role: 'Viewer', // Default role
+                id: "id",
+                role: 'Admin', // Default role
                 status: 'Active', // Default status
             });
         }
@@ -29,6 +37,8 @@ const UserSidebar = ({ isOpen, mode, user, onClose, onSave }) => {
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log("here")
+        console.log(formData);
         onSave(formData);
     };
 
@@ -62,20 +72,6 @@ const UserSidebar = ({ isOpen, mode, user, onClose, onSave }) => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="flex-grow p-6 space-y-6 overflow-y-auto">
-                    {/* Email Field */}
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            value={formData.email || ''}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
-                    </div>
-
                     {/* Password Field (only for 'add' mode) */}
                     {mode === 'add' && (
                         <div>
