@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, FileUp, Filter, Pencil } from 'lucide-react';
+import { Search, FileUp, Filter, Pencil, Trash2 } from 'lucide-react';
 import My_button from './My_button';
 import FilterSidebar from './FilterSidebar';
 
-// --- MOCK DATA HAS BEEN REMOVED ---
-
+// --- FIX IS HERE: ADD THESE CONSTANTS BACK ---
 // --- COLUMN DEFINITIONS ---
 const productColumns = [
     { key: 'ean', label: 'EAN Code' },
@@ -30,7 +29,7 @@ const storeColumns = [
 // --- EDITABLE COLUMNS CONFIG ---
 const editableProductCols = ['description', 'societyDescription'];
 const editableStoreCols = ['openDate', 'closeDate', 'salesFloorBand'];
-const narrowColumnKeys = ['openDate', 'closeDate', 'salesFloorBand']; // Columns to be made narrower
+const narrowColumnKeys = ['openDate', 'closeDate', 'salesFloorBand'];
 
 // --- DATE HELPER FUNCTIONS ---
 const formatDateForInput = (ddmmyyyy) => {
@@ -56,11 +55,13 @@ const parseDateDDMMYYYY_UTC = (dateString) => {
 /**
  * Reusable DataTable component
  */
-const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, isFilterActive }) => {
+const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, isFilterActive, onDelete }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [editingCell, setEditingCell] = useState(null);
+    const [selectedRows, setSelectedRows] = useState(new Set());
 
     const filteredData = useMemo(() => {
+        if (!data) return []; // Defensive check
         if (!searchTerm) return data;
         const lowercasedTerm = searchTerm.toLowerCase();
         return data.filter(item =>
@@ -69,6 +70,35 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
             )
         );
     }, [data, searchTerm]);
+
+    const handleDeleteClick = async () => {
+        if (selectedRows.size === 0) return;
+
+        if (window.confirm(`Are you sure you want to delete ${selectedRows.size} item(s)? This action cannot be undone.`)) {
+            const idsToDelete = Array.from(selectedRows);
+            await onDelete(idsToDelete);
+            setSelectedRows(new Set());
+        }
+    };
+
+    const handleRowSelect = (id) => {
+        const newSelection = new Set(selectedRows);
+        if (newSelection.has(id)) {
+            newSelection.delete(id);
+        } else {
+            newSelection.add(id);
+        }
+        setSelectedRows(newSelection);
+    };
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const allVisibleIds = new Set(filteredData.map(item => item._id));
+            setSelectedRows(allVisibleIds);
+        } else {
+            setSelectedRows(new Set());
+        }
+    };
 
     const handleExportCSV = () => {
         const headers = columns.map(c => c.label).join(',');
@@ -81,6 +111,7 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                 return value;
             }).join(',')
         );
+
         const csvContent = 'sep=,\n' + [headers, ...rows].join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' });
         const link = document.createElement('a');
@@ -169,6 +200,12 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                         />
                     </div>
                     <div className="flex items-center gap-2 w-full md:w-auto">
+                        {selectedRows.size > 0 && (
+                            <My_button onClick={handleDeleteClick} variant="danger" className="flex flex-1 md:flex-initial">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                <span>Delete ({selectedRows.size})</span>
+                            </My_button>
+                        )}
                         <My_button onClick={handleExportCSV} variant="outline-blue" className="flex flex-1 md:flex-initial">
                             <FileUp className="w-4 h-4 mr-2" />
                             <span>Export CSV</span>
@@ -188,6 +225,21 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
+                            <th scope="col" className="p-4">
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                        onChange={handleSelectAll}
+                                        checked={filteredData.length > 0 && selectedRows.size === filteredData.length}
+                                        ref={input => {
+                                            if (input) {
+                                                input.indeterminate = selectedRows.size > 0 && selectedRows.size < filteredData.length;
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </th>
                             {columns.map(col => (
                                 <th
                                     key={col.key}
@@ -202,6 +254,17 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                     <tbody>
                         {filteredData.map((item, index) => (
                             <tr key={item._id || index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <td className="w-4 p-4">
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            checked={selectedRows.has(item._id)}
+                                            onChange={() => handleRowSelect(item._id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
+                                </td>
                                 {columns.map(col => (
                                     <td
                                         key={col.key}
@@ -226,9 +289,41 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
  */
 const DataPage = ({ initialProducts, initialStores }) => {
     const [activeTab, setActiveTab] = useState('products');
-    // Initialize state with the props passed from the server component
-    const [products, setProducts] = useState(initialProducts);
-    const [stores, setStores] = useState(initialStores);
+    const [products, setProducts] = useState(initialProducts || []);
+    const [stores, setStores] = useState(initialStores || []);
+
+    const handleDelete = async (idsToDelete) => {
+        const collectionName = activeTab;
+
+        try {
+            const response = await fetch('/api/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idsToDelete, collectionName }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (collectionName === 'products') {
+                    setProducts(currentProducts =>
+                        currentProducts.filter(p => !idsToDelete.includes(p._id))
+                    );
+                } else {
+                    setStores(currentStores =>
+                        currentStores.filter(s => !idsToDelete.includes(s._id))
+                    );
+                }
+                alert(`Successfully deleted ${result.deletedCount} item(s).`);
+            } else {
+                console.error('Failed to delete items:', result.message);
+                alert(`Error: ${result.message || 'Failed to delete items.'}`);
+            }
+        } catch (error) {
+            console.error('Client-side error during deletion:', error);
+            alert('An error occurred while trying to delete the items.');
+        }
+    };
 
     const handleProductUpdate = (index, key, value) => {
         const updatedProducts = [...products];
@@ -258,9 +353,8 @@ const DataPage = ({ initialProducts, initialStores }) => {
         setFilters({});
     };
 
-    // --- LOGIKA ZA FILTRIRANJE PODATAKA (Corrected to use state) ---
     const filteredProductData = useMemo(() => {
-        // IMPORTANT: Filter the 'products' state, not the old mock data
+        if (!products) return [];
         return products.filter(item => {
             if (filters.localInd && String(item.localInd) !== filters.localInd) return false;
             if (filters.metadata && item.metadata !== filters.metadata) return false;
@@ -269,13 +363,13 @@ const DataPage = ({ initialProducts, initialStores }) => {
     }, [products, filters]);
 
     const filteredStoreData = useMemo(() => {
+        if (!stores) return [];
+
         const hasFilters = filters.minSalesFloor || filters.maxSalesFloor || filters.startDate || filters.endDate;
         if (!hasFilters) {
-            // IMPORTANT: Return the 'stores' state
             return stores;
         }
 
-        // IMPORTANT: Filter the 'stores' state, not the old mock data
         return stores.filter(item => {
             const minSales = parseInt(filters.minSalesFloor, 10);
             const maxSales = parseInt(filters.maxSalesFloor, 10);
@@ -335,6 +429,7 @@ const DataPage = ({ initialProducts, initialStores }) => {
                         onUpdate={handleProductUpdate}
                         onFilterClick={handleOpenSidebar}
                         isFilterActive={isFilterActive}
+                        onDelete={handleDelete}
                     />
                 )}
                 {activeTab === 'stores' && (
@@ -346,6 +441,7 @@ const DataPage = ({ initialProducts, initialStores }) => {
                         onUpdate={handleStoreUpdate}
                         onFilterClick={handleOpenSidebar}
                         isFilterActive={isFilterActive}
+                        onDelete={handleDelete}
                     />
                 )}
             </div>
