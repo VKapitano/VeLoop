@@ -1,62 +1,58 @@
-// app/api/data/route.js
-
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/app/lib/db';
 import { ObjectId } from 'mongodb';
 
-// These are the only fields we will allow to be updated via the API for security.
+// Security: These are the only fields we will allow to be updated via the API.
 const allowedProductFields = ['description', 'societyDescription'];
 const allowedStoreFields = ['openDate', 'closeDate', 'salesFloorBand'];
 
-// POST handler for deletion (no changes here)
+// --- HANDLER FOR CREATION (POST) ---
 export async function POST(request) {
     try {
-        const { idsToDelete, collectionName } = await request.json();
+        const { collectionName, newItem } = await request.json();
 
-        // 1. Validation
-        if (!idsToDelete || !Array.isArray(idsToDelete) || idsToDelete.length === 0) {
-            return NextResponse.json({ success: false, message: 'Invalid or empty list of IDs provided.' }, { status: 400 });
-        }
         if (collectionName !== 'products' && collectionName !== 'stores') {
             return NextResponse.json({ success: false, message: 'Invalid collection name.' }, { status: 400 });
         }
 
-        // 2. Convert string IDs to MongoDB ObjectId type
-        const objectIds = idsToDelete.map(id => new ObjectId(id));
-
-        // 3. Get the collection and perform deletion
         const collection = await getCollection(collectionName);
         if (!collection) {
             return NextResponse.json({ success: false, message: 'Database collection not found.' }, { status: 500 });
         }
 
-        const result = await collection.deleteMany({
-            _id: { $in: objectIds } // Use the $in operator to delete all matching documents
-        });
+        // Uniqueness Check for EAN/SiteKey before inserting
+        if (collectionName === 'products') {
+            const existing = await collection.findOne({ ean: newItem.ean });
+            if (existing) {
+                // 409 Conflict status code is appropriate here
+                return NextResponse.json({ success: false, message: `A product with EAN code ${newItem.ean} already exists. Please try again.` }, { status: 409 });
+            }
+        }
+        if (collectionName === 'stores') {
+            const existing = await collection.findOne({ siteKey: newItem.siteKey });
+            if (existing) {
+                return NextResponse.json({ success: false, message: `A store with Site Key ${newItem.siteKey} already exists. Please try again.` }, { status: 409 });
+            }
+        }
 
-        // 4. Send success response
-        return NextResponse.json({
-            success: true,
-            deletedCount: result.deletedCount
-        });
+        const result = await collection.insertOne(newItem);
+
+        // Return the newly created item, complete with its new _id, so the frontend can update its state
+        const createdItem = { ...newItem, _id: result.insertedId.toString() };
+
+        return NextResponse.json({ success: true, item: createdItem });
 
     } catch (error) {
-        console.error('API Deletion Error:', error);
-        // Check if the error is due to an invalid ObjectId format
-        if (error.message.includes('Argument passed in must be a string of 12 bytes or a string of 24 hex characters')) {
-            return NextResponse.json({ success: false, message: 'One or more provided IDs are invalid.' }, { status: 400 });
-        }
+        console.error('API Creation Error:', error);
         return NextResponse.json({ success: false, message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
 
-// --- NEW ---
-// PUT handler for updating a single document field
+// --- HANDLER FOR UPDATES (PUT) ---
 export async function PUT(request) {
     try {
         const { collectionName, id, field, value } = await request.json();
 
-        // 1. Validation
         if (!collectionName || !id || !field || value === undefined) {
             return NextResponse.json({ success: false, message: 'Missing required fields for update.' }, { status: 400 });
         }
@@ -64,32 +60,27 @@ export async function PUT(request) {
             return NextResponse.json({ success: false, message: 'Invalid collection name.' }, { status: 400 });
         }
 
-        // 2. Security Check: Ensure the field is allowed to be edited
         const allowedFields = collectionName === 'products' ? allowedProductFields : allowedStoreFields;
         if (!allowedFields.includes(field)) {
-            return NextResponse.json({ success: false, message: `Field '${field}' is not editable.` }, { status: 403 }); // 403 Forbidden
+            return NextResponse.json({ success: false, message: `Field '${field}' is not editable.` }, { status: 403 });
         }
 
-        // 3. Convert string ID to MongoDB ObjectId
         const objectId = new ObjectId(id);
 
-        // 4. Get the collection and perform the update
         const collection = await getCollection(collectionName);
         if (!collection) {
             return NextResponse.json({ success: false, message: 'Database collection not found.' }, { status: 500 });
         }
 
         const result = await collection.updateOne(
-            { _id: objectId }, // Filter to find the correct document
-            { $set: { [field]: value } } // Use $set to update only the specified field
+            { _id: objectId },
+            { $set: { [field]: value } }
         );
 
-        // 5. Check if the update was successful
         if (result.matchedCount === 0) {
             return NextResponse.json({ success: false, message: 'Document not found.' }, { status: 404 });
         }
 
-        // 6. Send success response
         return NextResponse.json({
             success: true,
             modifiedCount: result.modifiedCount
@@ -99,6 +90,38 @@ export async function PUT(request) {
         console.error('API Update Error:', error);
         if (error.message.includes('Argument passed in must be a string')) {
             return NextResponse.json({ success: false, message: 'The provided ID is invalid.' }, { status: 400 });
+        }
+        return NextResponse.json({ success: false, message: 'An internal server error occurred.' }, { status: 500 });
+    }
+}
+
+// --- HANDLER FOR DELETION (DELETE) ---
+export async function DELETE(request) {
+    try {
+        const { idsToDelete, collectionName } = await request.json();
+
+        if (!idsToDelete || !Array.isArray(idsToDelete) || idsToDelete.length === 0) {
+            return NextResponse.json({ success: false, message: 'Invalid or empty list of IDs provided.' }, { status: 400 });
+        }
+        if (collectionName !== 'products' && collectionName !== 'stores') {
+            return NextResponse.json({ success: false, message: 'Invalid collection name.' }, { status: 400 });
+        }
+
+        const objectIds = idsToDelete.map(id => new ObjectId(id));
+
+        const collection = await getCollection(collectionName);
+        if (!collection) {
+            return NextResponse.json({ success: false, message: 'Database collection not found.' }, { status: 500 });
+        }
+
+        const result = await collection.deleteMany({ _id: { $in: objectIds } });
+
+        return NextResponse.json({ success: true, deletedCount: result.deletedCount });
+
+    } catch (error) {
+        console.error('API Deletion Error:', error);
+        if (error.message.includes('Argument passed in must be a string')) {
+            return NextResponse.json({ success: false, message: 'One or more provided IDs are invalid.' }, { status: 400 });
         }
         return NextResponse.json({ success: false, message: 'An internal server error occurred.' }, { status: 500 });
     }
