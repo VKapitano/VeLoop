@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCollection } from '@/lib/db';
+
 import { auth, clerkClient } from '@clerk/nextjs/server';
 
 // Add this line to ensure the route is always dynamic

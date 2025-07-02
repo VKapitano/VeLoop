@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCollection } from '@/lib/db';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { ObjectId } from 'mongodb'; // We need this to convert the string ID back to a MongoDB ObjectId
 
 export async function PUT(request, { params }) {
     // 1. Security Check: User must be authenticated.

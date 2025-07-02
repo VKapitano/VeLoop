@@ -53,12 +53,15 @@ const Users = () => {
     };
 
     const handleSaveUser = async (userData) => {
+        console.log("user data:", userData.id)
         try {
             const response = await fetch(`/api/users/${userData.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: userData.role, status: userData.status }),
             });
+
+            console.log("res", response)
 
             if (!response.ok) {
                 throw new Error('Failed to update the user.');
