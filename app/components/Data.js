@@ -23,17 +23,17 @@ const productData = [
 ];
 
 const storeData = [
-    { society: 'Central', siteKey: 100071, openDate: '30/12/2014', closeDate: '29/11/2024', siteName: 'Store A', salesFloor: 3000 },
-    { society: 'Central', siteKey: 100072, openDate: '30/12/2015', closeDate: '30/12/2025', siteName: 'Store B', salesFloor: 2500 },
-    { society: 'Central', siteKey: 100077, openDate: '30/12/2016', closeDate: '30/12/2026', siteName: 'Store C', salesFloor: 3000 },
-    { society: 'Central', siteKey: 100078, openDate: '30/12/2017', closeDate: '30/12/2027', siteName: 'Store D', salesFloor: 7730 },
-    { society: 'Central', siteKey: 200092, openDate: '30/12/2002', closeDate: '30/12/2006', siteName: 'Store E', salesFloor: 7077 },
-    { society: 'Central', siteKey: 200097, openDate: '30/12/2002', closeDate: '30/12/2007', siteName: 'Store F', salesFloor: 980 },
-    { society: 'Central', siteKey: 300082, openDate: '30/12/2008', closeDate: '24/01/2020', siteName: 'Store G', salesFloor: 1775 },
-    { society: 'Central', siteKey: 300083, openDate: '30/12/2007', closeDate: '30/12/2021', siteName: 'Store H', salesFloor: 2585 },
-    { society: 'Central', siteKey: 300086, openDate: '30/12/2006', closeDate: '30/12/2022', siteName: 'Store I', salesFloor: 1946 },
-    { society: 'Central', siteKey: 400080, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store J', salesFloor: 2982 },
-    { society: 'Central', siteKey: 400092, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store K', salesFloor: 3000 },
+    { society: 'Central', siteKey: 100071, openDate: '30/12/2014', closeDate: '29/11/2024', siteName: 'Store A', salesFloor: 3000, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 100072, openDate: '30/12/2015', closeDate: '30/12/2025', siteName: 'Store B', salesFloor: 2500, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 100077, openDate: '30/12/2016', closeDate: '30/12/2026', siteName: 'Store C', salesFloor: 3000, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 100078, openDate: '30/12/2017', closeDate: '30/12/2027', siteName: 'Store D', salesFloor: 7730, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 200092, openDate: '30/12/2002', closeDate: '30/12/2006', siteName: 'Store E', salesFloor: 7077, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 200097, openDate: '30/12/2002', closeDate: '30/12/2007', siteName: 'Store F', salesFloor: 980, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 300082, openDate: '30/12/2008', closeDate: '24/01/2020', siteName: 'Store G', salesFloor: 1775, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 300083, openDate: '30/12/2007', closeDate: '30/12/2021', siteName: 'Store H', salesFloor: 2585, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 300086, openDate: '30/12/2006', closeDate: '30/12/2022', siteName: 'Store I', salesFloor: 1946, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 400080, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store J', salesFloor: 2982, salesFloorBand: 'Band C' },
+    { society: 'Central', siteKey: 400092, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store K', salesFloor: 3000, salesFloorBand: 'Band C' },
 ];
 
 
