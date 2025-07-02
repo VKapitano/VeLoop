@@ -5,37 +5,7 @@ import { Search, FileUp, Filter, Pencil } from 'lucide-react';
 import My_button from './My_button';
 import FilterSidebar from './FilterSidebar';
 
-// --- MOCK DATA ---
-// Using static mock data as a starting point, as requested.
-
-const productData = [
-    { ean: 4, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Double Espresso', societyDescription: 'Double Espresso', brandType: 'Manufacturers Brand', societyBrandType: 'Manufacturers Brand', ownBrand: 0 },
-    { ean: 16, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Espresso', societyDescription: 'Espresso', brandType: 'Manufacturers Brand', societyBrandType: 'Manufacturers Brand', ownBrand: 0 },
-    { ean: 18, society: 'Central', localInd: 1, includeInd: 'Yes', metadata: 'Analytics Model', description: 'Hot Chocolate', societyDescription: 'Hot Chocolate', brandType: 'Coop Brand', societyBrandType: 'Coop Brand', ownBrand: 1 },
-    { ean: 24, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Co-op Instore Bakery Multibuy 4 for 1.00', societyDescription: '', brandType: 'Coop Brand', societyBrandType: 'Coop Brand', ownBrand: 1 },
-    { ean: 25, society: 'Central', localInd: 0, includeInd: 'No', metadata: 'Unavailable', description: 'Saving Stamps', societyDescription: '', brandType: 'Manufacturers Brand', societyBrandType: 'Manufacturers Brand', ownBrand: 0 },
-    { ean: 30, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Pasty Puff Pasty Mince Pie With Brandy Each', societyDescription: '', brandType: 'Coop Brand', societyBrandType: 'Coop Brand', ownBrand: 1 },
-    { ean: 62, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Co-op Tt Triple Choc Cookie Each', societyDescription: '', brandType: 'Coop Brand', societyBrandType: 'Coop Brand', ownBrand: 1 },
-    { ean: 80, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Co-op Tt White Choc&Cranberry Cookie Each', societyDescription: '', brandType: 'Coop Brand', societyBrandType: 'Coop Brand', ownBrand: 1 },
-    { ean: 96, society: 'Central', localInd: 1, includeInd: 'Yes', metadata: 'Analytics Model', description: 'Candy King Per Kg', societyDescription: 'Candy King Per Kg', brandType: 'Manufacturers Brand', societyBrandType: 'Manufacturers Brand', ownBrand: 0 },
-    { ean: 146, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Co-op Mixed Iced Doughnuts Each', societyDescription: '', brandType: 'Coop Brand', societyBrandType: 'Coop Brand', ownBrand: 1 },
-    { ean: 154, society: 'Central', localInd: 0, includeInd: 'Yes', metadata: 'Unavailable', description: 'Co-op Brown Rustic Roll Each', societyDescription: '', brandType: 'Coop Brand', societyBrandType: 'Coop Brand', ownBrand: 1 },
-];
-
-const storeData = [
-    { society: 'Central', siteKey: 100071, openDate: '30/12/2014', closeDate: '29/11/2024', siteName: 'Store A', salesFloor: 3000, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 100072, openDate: '30/12/2015', closeDate: '30/12/2025', siteName: 'Store B', salesFloor: 2500, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 100077, openDate: '30/12/2016', closeDate: '30/12/2026', siteName: 'Store C', salesFloor: 3000, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 100078, openDate: '30/12/2017', closeDate: '30/12/2027', siteName: 'Store D', salesFloor: 7730, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 200092, openDate: '30/12/2002', closeDate: '30/12/2006', siteName: 'Store E', salesFloor: 7077, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 200097, openDate: '30/12/2002', closeDate: '30/12/2007', siteName: 'Store F', salesFloor: 980, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 300082, openDate: '30/12/2008', closeDate: '24/01/2020', siteName: 'Store G', salesFloor: 1775, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 300083, openDate: '30/12/2007', closeDate: '30/12/2021', siteName: 'Store H', salesFloor: 2585, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 300086, openDate: '30/12/2006', closeDate: '30/12/2022', siteName: 'Store I', salesFloor: 1946, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 400080, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store J', salesFloor: 2982, salesFloorBand: 'Band C' },
-    { society: 'Central', siteKey: 400092, openDate: '30/12/2014', closeDate: '30/12/2022', siteName: 'Store K', salesFloor: 3000, salesFloorBand: 'Band C' },
-];
-
+// --- MOCK DATA HAS BEEN REMOVED ---
 
 // --- COLUMN DEFINITIONS ---
 const productColumns = [
@@ -75,18 +45,11 @@ const formatDateForDisplay = (yyyymmdd) => {
     return `${day}/${month}/${year}`;
 };
 
-// --- AŽURIRANO: Pomoćna funkcija koja parsira datum u UTC da se izbjegnu problemi s vremenskom zonom ---
-/**
- * @param {string} dateString - Datum u formatu "DD/MM/YYYY".
- * @returns {Date|null} - Parsirani Date objekt u UTC ili null ako je format neispravan.
- */
 const parseDateDDMMYYYY_UTC = (dateString) => {
     if (!dateString || typeof dateString !== 'string') return null;
     const parts = dateString.split('/');
     if (parts.length !== 3) return null;
     const [day, month, year] = parts.map(Number);
-    // Stvaramo UTC datum kako bismo izbjegli probleme s lokalnom vremenskom zonom.
-    // Date.UTC vraća timestamp, koji onda new Date() pretvara u ispravan UTC Date objekt.
     return new Date(Date.UTC(year, month - 1, day));
 };
 
@@ -95,7 +58,7 @@ const parseDateDDMMYYYY_UTC = (dateString) => {
  */
 const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, isFilterActive }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [editingCell, setEditingCell] = useState(null); // e.g., { index: 0, key: 'description' }
+    const [editingCell, setEditingCell] = useState(null);
 
     const filteredData = useMemo(() => {
         if (!searchTerm) return data;
@@ -118,7 +81,6 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                 return value;
             }).join(',')
         );
-
         const csvContent = 'sep=,\n' + [headers, ...rows].join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' });
         const link = document.createElement('a');
@@ -188,31 +150,6 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
         return value;
     };
 
-    {/*const renderCell = (item, column) => {
-            const value = item[column.key];
-            if (dataType === 'stores' && (column.key === 'openDate' || column.key === 'closeDate')) {
-                return (
-                    <div className="relative">
-                        <input
-                            type="text"
-                            readOnly
-                            value={value}
-                            className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-200 text-sm rounded-lg block w-full p-2.5 pr-8"
-                        />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4Z M0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                            </svg>
-                        </div>
-                    </div>
-                );
-            }
-
-            return value;
-        };*/}
-
-
-
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6">
@@ -264,7 +201,7 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                     </thead>
                     <tbody>
                         {filteredData.map((item, index) => (
-                            <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <tr key={item._id || index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 {columns.map(col => (
                                     <td
                                         key={col.key}
@@ -287,10 +224,11 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
 /**
  * Main page component with tab navigation
  */
-const DataPage = () => {
+const DataPage = ({ initialProducts, initialStores }) => {
     const [activeTab, setActiveTab] = useState('products');
-    const [products, setProducts] = useState(productData);
-    const [stores, setStores] = useState(storeData);
+    // Initialize state with the props passed from the server component
+    const [products, setProducts] = useState(initialProducts);
+    const [stores, setStores] = useState(initialStores);
 
     const handleProductUpdate = (index, key, value) => {
         const updatedProducts = [...products];
@@ -318,74 +256,48 @@ const DataPage = () => {
 
     const handleResetFilters = () => {
         setFilters({});
-        // Opcionalno, zatvori sidebar nakon reseta
-        // handleCloseSidebar(); 
     };
 
-    // --- LOGIKA ZA FILTRIRANJE PODATAKA ---
+    // --- LOGIKA ZA FILTRIRANJE PODATAKA (Corrected to use state) ---
     const filteredProductData = useMemo(() => {
-        return productData.filter(item => {
+        // IMPORTANT: Filter the 'products' state, not the old mock data
+        return products.filter(item => {
             if (filters.localInd && String(item.localInd) !== filters.localInd) return false;
             if (filters.metadata && item.metadata !== filters.metadata) return false;
             return true;
         });
-    }, [filters]);
+    }, [products, filters]);
 
     const filteredStoreData = useMemo(() => {
-        // Ako nema filtera, nema ni filtriranja. Vrati sve.
         const hasFilters = filters.minSalesFloor || filters.maxSalesFloor || filters.startDate || filters.endDate;
         if (!hasFilters) {
-            return storeData;
+            // IMPORTANT: Return the 'stores' state
+            return stores;
         }
 
-        return storeData.filter(item => {
-            // 1. Filtriranje po Sales Floor
+        // IMPORTANT: Filter the 'stores' state, not the old mock data
+        return stores.filter(item => {
             const minSales = parseInt(filters.minSalesFloor, 10);
             const maxSales = parseInt(filters.maxSalesFloor, 10);
 
-            if (!isNaN(minSales) && item.salesFloor < minSales) {
-                return false; // Ne zadovoljava minimalnu kvadraturu
-            }
-            if (!isNaN(maxSales) && item.salesFloor > maxSales) {
-                return false; // Ne zadovoljava maksimalnu kvadraturu
-            }
+            if (!isNaN(minSales) && item.salesFloor < minSales) return false;
+            if (!isNaN(maxSales) && item.salesFloor > maxSales) return false;
 
-            // 2. Filtriranje po datumu (logika "sadržano unutar")
             const filterStartDate = filters.startDate ? new Date(filters.startDate) : null;
             const filterEndDate = filters.endDate ? new Date(filters.endDate) : null;
 
-            // Ako je postavljen barem jedan filter za datum, radi provjeru
             if (filterStartDate || filterEndDate) {
                 const itemOpenDate = parseDateDDMMYYYY_UTC(item.openDate);
                 const itemCloseDate = parseDateDDMMYYYY_UTC(item.closeDate);
 
-                // Ako trgovina nema ispravne datume, ne može proći filter
-                if (!itemOpenDate || !itemCloseDate) {
-                    return false;
-                }
-
-                // --- IZMIJENJENA LOGIKA ---
-                // Primjenjuje se logika "sadržano unutar raspona filtera"
-
-                // Uvjet 1: Datum otvaranja trgovine mora biti NAKON ili ISTI KAO početak filtera.
-                // Ako je filterStartDate postavljen i datum otvaranja je PRIJE, izbaci.
-                if (filterStartDate && itemOpenDate < filterStartDate) {
-                    return false;
-                }
-
-                // Uvjet 2: Datum zatvaranja trgovine mora biti PRIJE ili ISTI KAO kraj filtera.
-                // Ako je filterEndDate postavljen i datum zatvaranja je NAKON, izbaci.
-                if (filterEndDate && itemCloseDate > filterEndDate) {
-                    return false;
-                }
+                if (!itemOpenDate || !itemCloseDate) return false;
+                if (filterStartDate && itemOpenDate < filterStartDate) return false;
+                if (filterEndDate && itemCloseDate > filterEndDate) return false;
             }
-
-            // Ako je stavka prošla sve provjere, zadrži je u filtriranom nizu
             return true;
         });
-    }, [filters]);
+    }, [stores, filters]);
 
-    // Provjera jesu li filteri aktivni
     const isFilterActive = Object.keys(filters).length > 0;
 
     return (
