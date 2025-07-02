@@ -5,7 +5,6 @@ import { Search, FileUp, Filter, Pencil, Trash2 } from 'lucide-react';
 import My_button from './My_button';
 import FilterSidebar from './FilterSidebar';
 
-// --- FIX IS HERE: ADD THESE CONSTANTS BACK ---
 // --- COLUMN DEFINITIONS ---
 const productColumns = [
     { key: 'ean', label: 'EAN Code' },
@@ -61,7 +60,7 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
     const [selectedRows, setSelectedRows] = useState(new Set());
 
     const filteredData = useMemo(() => {
-        if (!data) return []; // Defensive check
+        if (!data) return [];
         if (!searchTerm) return data;
         const lowercasedTerm = searchTerm.toLowerCase();
         return data.filter(item =>
@@ -135,7 +134,15 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
         if ((key === 'openDate' || key === 'closeDate') && value) {
             finalValue = formatDateForDisplay(value);
         }
-        onUpdate(index, key, finalValue);
+
+        const item = data[index];
+        if (!item || !item._id) {
+            console.error("Cannot save: Item or item._id is missing.");
+            setEditingCell(null);
+            return;
+        }
+
+        onUpdate(index, item._id, key, finalValue);
         setEditingCell(null);
     };
 
@@ -182,6 +189,7 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
     };
 
 
+    // --- FIX IS HERE: THIS IS THE CORRECT JSX TO RETURN ---
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
@@ -325,18 +333,35 @@ const DataPage = ({ initialProducts, initialStores }) => {
         }
     };
 
-    const handleProductUpdate = (index, key, value) => {
-        const updatedProducts = [...products];
-        updatedProducts[index] = { ...updatedProducts[index], [key]: value };
-        setProducts(updatedProducts);
-    };
+    const handleUpdate = async (index, id, field, value) => {
+        const collectionName = activeTab;
+        const currentData = collectionName === 'products' ? products : stores;
+        const setData = collectionName === 'products' ? setProducts : setStores;
 
-    const handleStoreUpdate = (index, key, value) => {
-        const updatedStores = [...stores];
-        updatedStores[index] = { ...updatedStores[index], [key]: value };
-        setStores(updatedStores);
-    };
+        const updatedData = [...currentData];
+        updatedData[index] = { ...updatedData[index], [field]: value };
+        setData(updatedData);
 
+        try {
+            const response = await fetch('/api/data', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ collectionName, id, field, value }),
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                console.error('Failed to save update:', result.message);
+                alert(`Error: Could not save your change. ${result.message}`);
+                setData(currentData);
+            }
+        } catch (error) {
+            console.error('Client-side error during update:', error);
+            alert('An error occurred. Could not save your change.');
+            setData(currentData);
+        }
+    };
 
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [filters, setFilters] = useState({});
@@ -426,7 +451,7 @@ const DataPage = ({ initialProducts, initialStores }) => {
                         data={filteredProductData}
                         columns={productColumns}
                         dataType="products"
-                        onUpdate={handleProductUpdate}
+                        onUpdate={handleUpdate}
                         onFilterClick={handleOpenSidebar}
                         isFilterActive={isFilterActive}
                         onDelete={handleDelete}
@@ -438,7 +463,7 @@ const DataPage = ({ initialProducts, initialStores }) => {
                         data={filteredStoreData}
                         columns={storeColumns}
                         dataType="stores"
-                        onUpdate={handleStoreUpdate}
+                        onUpdate={handleUpdate}
                         onFilterClick={handleOpenSidebar}
                         isFilterActive={isFilterActive}
                         onDelete={handleDelete}
