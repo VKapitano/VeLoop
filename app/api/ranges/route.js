@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import clientPromise from '@/app/lib/db'; // ili '@/lib/mongodb'
+import { ObjectId } from 'mongodb'; // KLJUČAN IMPORT za rad s _id
 
 export async function GET() {
     try {
