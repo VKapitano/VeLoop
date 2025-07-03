@@ -1,28 +1,31 @@
-import { MongoClient } from 'mongodb'
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 if (!process.env.DB_URI) {
-  throw new Error('Invalid/Missing environment variable: "DB_URI"')
+    throw new Error("Mongo DB not found")
 }
 
-const uri = process.env.DB_URI
-const options = {}
+const client = new MongoClient(process.env.DB_URI, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
 
-let client
-let clientPromise
-
-if (process.env.NODE_ENV === 'development') {
-  // U development modu, koristimo globalnu varijablu da se vrijednost
-  // sačuva između "hot reloads" koje Next.js radi.
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options)
-    global._mongoClientPromise = client.connect()
-  }
-  clientPromise = global._mongoClientPromise
-} else {
-  // U produkciji, nema hot reloads.
-  client = new MongoClient(uri, options)
-  clientPromise = client.connect()
+async function getDB(dbName) {
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        console.log("connected to DB")
+        return client.db(dbName)
+    } catch (err) {
+        console.error(err)
+    }
 }
 
-// Izvozimo MongoClient promise. Ovo je ključna promjena!
-export default clientPromise
+export async function getCollection(collectionName) {
+    const db = await getDB("next_blog_db")
+    if (db) {
+        return db.collection(collectionName)
+    }
+}

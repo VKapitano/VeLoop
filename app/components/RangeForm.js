@@ -405,7 +405,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                             </My_button>
                             {/* Ovaj gumb sada samo prikazuje editor */}
                             <My_button variant="primary" icon={Plus} onClick={() => setShowEditor(true)}>
-                                <span>+</span>
+                                <span className='mr-1'>+</span>
                                 <span>Add Item</span>
                             </My_button>
                         </div>

@@ -19,7 +19,7 @@ const Ranges_bar = ( {searchTerm, onSearchChange} ) => {
             {/* Desna strana: Gumb */}
             <Link href="/ranges/add" passHref>
                 <My_button variant="primary">
-                    <span>+</span>
+                    <span className='mr-1'>+</span>
                     <span className='hidden md:block'>Add New Range</span>
                 </My_button>
             </Link>
