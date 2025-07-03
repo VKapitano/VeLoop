@@ -123,25 +123,6 @@ const Sidenav = () => {
                     </nav>
                 </div>
 
-                <div className="p-2 border-t dark:border-gray-800">
-                    <ul className="space-y-2">
-                        {/* --- START OF DARK MODE TOGGLE FIX --- */}
-                        <li>
-                            <div
-                                onClick={toggleDarkMode}
-                                className="flex items-center p-3 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800 overflow-hidden gap-4"
-                            >
-                                <div className="flex-shrink-0 w-10 flex justify-center">
-                                    {isDarkMode ? <Sun size={24} className="flex-shrink-0" /> : <Moon size={24} className="flex-shrink-0" />}
-                                </div>
-                                <span className="whitespace-nowrap transition-opacity duration-300 lg:w-0 lg:opacity-0 group-hover:lg:w-auto group-hover:lg:opacity-100">
-                                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                                </span>
-                            </div>
-                        </li>
-                        {/* --- END OF DARK MODE TOGGLE FIX --- */}
-                    </ul>
-                </div>
             </aside>
         </>
     );
