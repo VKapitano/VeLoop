@@ -66,15 +66,19 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
     // Dodaje novi item u listu i resetira polja
     const handleAddNewItem = () => {
         if (!newItemName.trim()) {
-            alert('Item name is required.'); // Jednostavna validacija
+            alert('Item name is required.');
             return;
         }
+        
+        // ISPRAVAK: Koristimo crypto.randomUUID() za generiranje
+        // jedinstvenog i konzistentnog STRINGA za _id.
         const newItem = {
-            id: Date.now(), // Jednostavni jedinstveni ID
+            _id: crypto.randomUUID(), 
             name: newItemName,
             description: newItemDesc,
             ean: newItemEan,
         };
+
         setItems(prevItems => [...prevItems, newItem]);
         
         // Resetiraj polja za unos
@@ -83,40 +87,51 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
         setNewItemEan('0');
     };
 
-    // --- NOVA FUNKCIJA ZA SPREMANJE ---
-    // Jedinstvena funkcija za spremanje
+    // --- ISPRAVLJENA handleSave FUNKCIJA ---
     const handleSave = () => {
         if (!rangeTitle.trim()) {
             alert('Range Title is required!');
             return;
         }
 
-        const rangeData = {
-            id: mode === 'edit' ? parseInt(rangeId) : Date.now(),
-            title: rangeTitle,
-            description: rangeDesc,
-            items: items,
-            startDate: startDate,
-            endDate: endDate,
-        };
-
         if (mode === 'edit') {
-            updateRange(rangeData);
+            // --- LOGIKA ZA AŽURIRANJE ---
+            // Pripremi podatke BEZ _id polja
+            const dataToUpdate = {
+                title: rangeTitle,
+                description: rangeDesc,
+                items: items,
+                startDate: startDate,
+                endDate: endDate,
+            };
+            // Pozovi updateRange s ISPRAVNIM argumentima: (id, data)
+            updateRange(rangeId, dataToUpdate);
         } else {
-            addRange(rangeData);
+            // --- LOGIKA ZA DODAVANJE ---
+            // Pripremi podatke za NOVI range. NEMA _id polja!
+            const newRangeData = {
+                title: rangeTitle,
+                description: rangeDesc,
+                items: items, // Ovdje itemi imaju privremene _id-jeve, što je u redu
+                startDate: startDate,
+                endDate: endDate,
+            };
+            // Pošalji samo podatke. Server će se pobrinuti za sve ostalo.
+            addRange(newRangeData);
         }
 
         router.push('/ranges');
     };
 
+    // --- ISPRAVLJENA handleDelete FUNKCIJA ---
     const handleDelete = () => {
-        // Provjera da smo u edit modu i da imamo ID
         if (mode === 'edit' && rangeId) {
             const isConfirmed = window.confirm(`Are you sure you want to permanently delete the range "${rangeTitle}"?`);
             
             if (isConfirmed) {
-                deleteRange(parseInt(rangeId));
-                router.push('/ranges'); // Vrati korisnika na listu nakon brisanja
+                // 4. Pošalji `rangeId` kao string, bez parseInt()
+                deleteRange(rangeId); 
+                router.push('/ranges');
             }
         }
     };
@@ -128,7 +143,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
 
         // Ako korisnik potvrdi, izvrši brisanje
         if (isConfirmed) {
-            setItems(prevItems => prevItems.filter(item => item.id !== idToDelete));
+            setItems(prevItems => prevItems.filter(item => item._id !== idToDelete));
         }
     };
 
@@ -183,7 +198,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
     // Pokreće edit mod i sprema backup
     const handleStartEdit = (item) => {
         setItemsBeforeEdit([...items]); // Spremi trenutnu listu kao backup
-        setEditingItemId(item.id);      // Postavi ID itema koji se uređuje
+        setEditingItemId(item._id);      // Postavi ID itema koji se uređuje
     };
 
     // Sprema promjene (samo izlazi iz edit moda)
@@ -205,7 +220,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
     const handleItemChange = (itemId, field, value) => {
         setItems(prevItems =>
             prevItems.map(item =>
-                item.id === itemId ? { ...item, [field]: value } : item
+                item._id === itemId ? { ...item, [field]: value } : item
             )
         );
     };
@@ -235,13 +250,13 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
             const localEanCounts = {};
             items.forEach(item => {
                 const ean = String(item.ean);
-                if (ean && ean !== '0') {
+                if (ean) {
                     localEanCounts[ean] = (localEanCounts[ean] || 0) + 1;
                 }
             });
 
             // KORAK 3: Tražimo duplikate u SVIM OSTALIM spremljenim rangeovima
-            const otherRanges = ranges.filter(r => mode === 'add' || r.id !== parseInt(rangeId));
+            const otherRanges = ranges.filter(r => mode === 'add' || r._id !== parseInt(rangeId));
             const globalEanSet = new Set();
             otherRanges.forEach(range => {
                 (range.items || []).forEach(item => {
@@ -270,7 +285,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                 const isLocalDuplicate = localEanCounts[ean] > 1;
                 const isGlobalDuplicate = globalEanSet.has(ean);
 
-                newStatuses[item.id] = isLocalDuplicate || isGlobalDuplicate;
+                newStatuses[item._id] = isLocalDuplicate || isGlobalDuplicate;
             });
 
             setEanStatuses(newStatuses);
@@ -432,7 +447,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                             {/* Lista spremljenih itema */}
                             {filteredItems.map(item => {
                                 // 1. Dohvati status (true, false, ili undefined) iz `eanStatuses` stanja
-                                const hasDuplicate = eanStatuses ? eanStatuses[item.id] : undefined;
+                                const hasDuplicate = eanStatuses ? eanStatuses[item._id] : undefined;
                                 
                                 // 2. Odredi klasu za boju na temelju statusa
                                 const rowClass = 
@@ -441,18 +456,18 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                     '';                                                           // Bez boje ako provjera nije aktivna
 
                                 // 3. Vrati JSX s dinamički dodanom klasom
-                                return editingItemId === item.id ? (
+                                return editingItemId === item._id ? (
                                     // --- PRIKAZ U EDIT MODU ---
                                     // Dodajemo `rowClass` i `transition-colors` na glavni div
-                                    <div key={item.id} className={`grid grid-cols-12 gap-4 items-center px-6 py-4 ${rowClass} transition-colors duration-300`}>
+                                    <div key={item._id} className={`grid grid-cols-12 gap-4 items-center px-6 py-4 ${rowClass} transition-colors duration-300`}>
                                         <div className="col-span-6 md:col-span-4">
-                                            <input type="text" value={item.name} onChange={(e) => handleItemChange(item.id, 'name', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
+                                            <input type="text" value={item.name} onChange={(e) => handleItemChange(item._id, 'name', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                         </div>
                                         <div className="hidden md:block md:col-span-4">
-                                            <input type="text" value={item.description} onChange={(e) => handleItemChange(item.id, 'description', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
+                                            <input type="text" value={item.description} onChange={(e) => handleItemChange(item._id, 'description', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                         </div>
                                         <div className="col-span-3 md:col-span-2">
-                                            <input type="number" value={item.ean} onChange={(e) => handleItemChange(item.id, 'ean', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
+                                            <input type="number" value={item.ean} onChange={(e) => handleItemChange(item._id, 'ean', e.target.value)} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm"/>
                                         </div>
                                         <div className="col-span-3 md:col-span-2 flex justify-end items-center gap-2">
                                             <button onClick={handleSaveEdit} className="p-1 text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors">
@@ -466,7 +481,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                 ) : (
                                     // --- STANDARDNI PRIKAZ ---
                                     // Dodajemo `rowClass` i `transition-colors` i ovdje
-                                    <div key={item.id} className={`grid grid-cols-12 gap-4 items-center px-6 py-2 border-b border-slate-200 dark:border-gray-700 ${rowClass} transition-colors duration-300`}>
+                                    <div key={item._id} className={`grid grid-cols-12 gap-4 items-center px-6 py-2 border-b border-slate-200 dark:border-gray-700 ${rowClass} transition-colors duration-300`}>
                                         <div className="col-span-4 text-gray-800 dark:text-gray-200">{item.name}</div>
                                         <div className="hidden md:block md:col-span-4 text-gray-600 dark:text-gray-400">{item.description}</div>
                                         <div className="col-span-4 md:col-span-2 text-gray-800 dark:text-gray-200">{item.ean}</div>
@@ -474,7 +489,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                                             <button onClick={() => handleStartEdit(item)} className="p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
                                                 <SquarePen size={20} />
                                             </button>
-                                            <button onClick={() => handleDeleteItem(item.id, item.name)} className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+                                            <button onClick={() => handleDeleteItem(item._id, item.name)} className="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
                                                 <Trash2 size={20} />
                                             </button>
                                         </div>

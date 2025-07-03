@@ -76,14 +76,14 @@ const Ranges_list = ({ data }) => {
             <div className="flex-1 overflow-y-auto">
                 {sortedData.map((item, index) => (
                     <div
-                        key={item.id}
+                        key={item._id}
                         // Redak: Dodana tamna boja granice i uklonjena donja granica za zadnji element
                         className="grid grid-cols-24 gap-4 items-center px-6 py-4 border-b border-slate-200 dark:border-gray-700 last:border-b-0"
                     >
                         {/* Stupac: TITLE - Dodana tamna boja teksta */}
                         <div className="col-span-16 sm:col-span-8 lg:col-span-6">
                             <p className="text-blue-600 dark:text-blue-400 font-medium truncate">
-                                <Link href={`/ranges/edit/${item.id}`}>
+                                <Link href={`/ranges/edit/${item._id}`}>
                                     {item.title}
                                 </Link>
                             </p>
@@ -110,11 +110,11 @@ const Ranges_list = ({ data }) => {
                         {/* Stupac: ACTIONS - Dodane tamne boje za ikone */}
                         <div className="col-span-8 sm:col-span-3 lg:col-span-2 flex justify-end items-center gap-4">
                             <button className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                                <Link href={`/ranges/edit/${item.id}`}>
+                                <Link href={`/ranges/edit/${item._id}`}>
                                     <SquarePen size={20} />
                                 </Link>
                             </button>
-                            <button onClick={() => handleDelete(item.id, item.title)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
+                            <button onClick={() => handleDelete(item._id, item.title)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
                                 <Trash2 size={20} />
                             </button>
                         </div>

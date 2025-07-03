@@ -1,0 +1,51 @@
+[
+    {
+        "title": "Summer Sale 2024",
+        "description": "Discount range for all summer items.",
+        "startDate": "2025-06-27",
+        "endDate": "2025-07-04",
+        "items": [
+            { "_id": { "$oid": "65a000000000000000000001" }, "name": "new", "description": "desc", "ean": 0 },
+            { "_id": { "$oid": "65a000000000000000000002" }, "name": "new", "description": "desc", "ean": 0 }
+        ]
+    },
+    {
+        "title": "Black Friday Deals",
+        "description": "Special offers available only on Black Friday.",
+        "startDate": "2024-06-01",
+        "endDate": "2024-08-31",
+        "items": [
+            { "_id": { "$oid": "65a000000000000000000003" }, "name": "new", "description": "desc", "ean": 0 },
+            { "_id": { "$oid": "65a000000000000000000004" }, "name": "new", "description": "desc", "ean": 0 },
+            { "_id": { "$oid": "65a000000000000000000005" }, "name": "new", "description": "desc", "ean": 0 }
+        ]
+    },
+    {
+        "title": "New Year Clearance",
+        "description": "End-of-year clearance sale for selected products.",
+        "startDate": "2024-08-21",
+        "endDate": "2024-08-31",
+        "items": [
+            { "_id": { "$oid": "65a000000000000000000006" }, "name": "new", "description": "desc", "ean": 0 }
+        ]
+    },
+    {
+        "title": "VIP Customer Exclusive",
+        "description": "A special range for our most loyal customers.",
+        "startDate": "2021-04-01",
+        "endDate": "2024-06-27",
+        "items": [
+            { "_id": { "$oid": "65a000000000000000000007" }, "name": "new", "description": "desc", "ean": 0 },
+            { "_id": { "$oid": "65a000000000000000000008" }, "name": "new", "description": "desc", "ean": 0 }
+        ]
+    },
+    {
+        "title": "Flash Sale",
+        "description": "Limited time offer, valid for 24 hours.",
+        "startDate": "2024-06-12",
+        "endDate": "2024-07-15",
+        "items": [
+            { "_id": { "$oid": "65a000000000000000000009" }, "name": "new", "description": "desc", "ean": 0 }
+        ]
+    }
+]
