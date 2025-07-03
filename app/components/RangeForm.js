@@ -39,6 +39,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
     const [itemsBeforeEdit, setItemsBeforeEdit] = useState(null);
 
     const [eanStatuses, setEanStatuses] = useState(null);
+    const [isCheckingEans, setIsCheckingEans] = useState(false);
 
     useEffect(() => {
         if (mode === 'edit' && rangeId) {
@@ -76,7 +77,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
             _id: crypto.randomUUID(), 
             name: newItemName,
             description: newItemDesc,
-            ean: newItemEan,
+            ean: parseInt(newItemEan, 10) || 0,
         };
 
         setItems(prevItems => [...prevItems, newItem]);
@@ -218,85 +219,65 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
 
     // Ažurira podatke itema direktno u `items` listi dok korisnik tipka
     const handleItemChange = (itemId, field, value) => {
+        const processedValue = field === 'ean' ? (parseInt(value, 10) || 0) : value;
+
         setItems(prevItems =>
             prevItems.map(item =>
-                item._id === itemId ? { ...item, [field]: value } : item
+                item._id === itemId ? { ...item, [field]: processedValue } : item
             )
         );
     };
 
     // --- NOVA FUNKCIJA ZA PROVJERU EAN KODOVA ---
-    const handleEanCheck = () => {
-        // Ako su statusi već postavljeni, resetiraj ih i izađi iz funkcije
+    const handleEanCheck = async () => {
+        // Ako su statusi već postavljeni, resetiraj ih i izađi
         if (eanStatuses) {
             setEanStatuses(null);
             return;
         }
 
-        // --- Ostatak logike se izvršava samo ako je eanStatuses null ---
-        console.log(`--- Starting EAN Check for Each Item in Range: "${rangeTitle || 'New Range'}" ---`);
-        let anyDuplicatesFound = false;
-        
-        const currentItems = items;
-
-        // KORAK 1: Iteriraj kroz SVAKI item u trenutnoj formi da za njega nađemo duplikate.
-        currentItems.forEach(itemToCheck => {
-            const ean = itemToCheck.ean;
-
-            console.log(`- Checking for duplicates of item: "${itemToCheck.name}" (EAN: ${ean})`);
-            const locationsOfDuplicates = [];
-
-            // KORAK 2: Tražimo duplikate unutar TRENUTNE LISTE
-            const localEanCounts = {};
-            items.forEach(item => {
-                const ean = String(item.ean);
-                if (ean) {
-                    localEanCounts[ean] = (localEanCounts[ean] || 0) + 1;
-                }
-            });
-
-            // KORAK 3: Tražimo duplikate u SVIM OSTALIM spremljenim rangeovima
-            const otherRanges = ranges.filter(r => mode === 'add' || r._id !== parseInt(rangeId));
-            const globalEanSet = new Set();
-            otherRanges.forEach(range => {
-                (range.items || []).forEach(item => {
-                    if (item.ean) {
-                        globalEanSet.add(String(item.ean));
-                    }
-                });
-            });
-
-            // KORAK 4: Ispisujemo izvještaj za TRENUTNI item koji provjeravamo
-            if (locationsOfDuplicates.length > 0) {
-                anyDuplicatesFound = true; // Zabilježi da je barem jedan duplikat pronađen ukupno
-                console.warn(`  ⚠️ Found ${locationsOfDuplicates.length} duplicate(s) for this item:`);
-                locationsOfDuplicates.forEach(loc => {
-                    console.log(`    - Item: "${loc.itemName}" (ID: ${loc.itemId}) in Range: "${loc.rangeTitle}"`);
-                });
-            } else {
-                console.log(`  ✅ No duplicates found for this item.`);
-            }
-            console.log('--------------------');
-            // odredi status za svaki
-            const newStatuses = {};
-            items.forEach(item => {
-                const ean = String(item.ean);
-                
-                const isLocalDuplicate = localEanCounts[ean] > 1;
-                const isGlobalDuplicate = globalEanSet.has(ean);
-
-                newStatuses[item._id] = isLocalDuplicate || isGlobalDuplicate;
-            });
-
-            setEanStatuses(newStatuses);
-        });
-
-        // KORAK 5: Završni sažetak
-        if (!anyDuplicatesFound) {
-            console.log("✅ Overall Result: No EAN duplicates were found for any item in this list.");
+        if (items.length === 0) {
+            alert("No items to check.");
+            return;
         }
 
-        console.log('--- EAN Check Complete ---');
+        setIsCheckingEans(true); // Započni provjeru
+        console.log(`--- Starting EAN Check via API for Range: "${rangeTitle || 'New Range'}" ---`);
+
+        try {
+            // Pripremi podatke za slanje na server.
+            // Važno: šaljemo samo _id i ean jer je to sve što server treba.
+            const itemsToVerify = items.map(item => ({ _id: item._id, ean: item.ean }));
+
+            // Pozovi novu API rutu
+            const response = await fetch('/api/ean-check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ items: itemsToVerify }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to check EANs.');
+            }
+
+            const result = await response.json();
+            
+            // Postavi statuse duplikata koje smo dobili od servera
+            setEanStatuses(result.duplicates);
+
+            console.log('API Check Result:', result.duplicates);
+
+        } catch (error) {
+            console.error("EAN Check failed:", error);
+            alert(`Could not perform EAN check: ${error.message}`);
+            setEanStatuses(null); // Resetiraj statuse u slučaju greške
+        } finally {
+            setIsCheckingEans(false); // Završi provjeru
+            console.log('--- EAN Check Complete ---');
+        }
     };
 
     return (

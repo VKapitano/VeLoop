@@ -54,6 +54,7 @@ export async function PUT(request, { params }) {
                 // Ako već ima ObjectId, ne diraj ga.
                 if (!item._id || typeof item._id === 'string') {
                     item._id = new ObjectId();
+                    item.ean = parseInt(item.ean, 10) || 0;
                 }
             });
         }

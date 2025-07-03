@@ -31,6 +31,7 @@ export async function POST(request) {
         if (newRange.items && Array.isArray(newRange.items)) {
             newRange.items.forEach(item => {
                 item._id = new ObjectId();
+                item.ean = parseInt(item.ean, 10) || 0;
             });
         }
         
