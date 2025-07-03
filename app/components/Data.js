@@ -5,6 +5,7 @@ import { Search, FileUp, Filter, Pencil, Trash2, PlusCircle } from 'lucide-react
 import My_button from './My_button';
 import FilterSidebar from './FilterSidebar';
 import AddDataSidebar from './AddDataSidebar';
+import EditDataSidebar from './EditDataSidebar'; // <-- IMPORT THE NEW COMPONENT
 
 // --- COLUMN DEFINITIONS ---
 const productColumns = [
@@ -26,24 +27,11 @@ const storeColumns = [
     { key: 'salesFloorBand', label: 'Sales Floor SQ FT Band' },
 ];
 
-// --- EDITABLE COLUMNS CONFIG ---
-const editableProductCols = ['description', 'societyDescription'];
-const editableStoreCols = ['openDate', 'closeDate', 'salesFloorBand'];
+// --- REMOVED EDITABLE COLUMNS CONFIG ---
+// This is no longer needed as the Edit sidebar handles what's editable.
 const narrowColumnKeys = ['openDate', 'closeDate', 'salesFloorBand'];
 
-// --- DATE HELPER FUNCTIONS ---
-const formatDateForInput = (ddmmyyyy) => {
-    if (!ddmmyyyy || ddmmyyyy.split('/').length !== 3) return '';
-    const [day, month, year] = ddmmyyyy.split('/');
-    return `${year}-${month}-${day}`;
-};
-
-const formatDateForDisplay = (yyyymmdd) => {
-    if (!yyyymmdd || yyyymmdd.split('-').length !== 3) return '';
-    const [year, month, day] = yyyymmdd.split('-');
-    return `${day}/${month}/${year}`;
-};
-
+// --- DATE HELPER FUNCTION (no longer needed here) ---
 const parseDateDDMMYYYY_UTC = (dateString) => {
     if (!dateString || typeof dateString !== 'string') return null;
     const parts = dateString.split('/');
@@ -55,9 +43,8 @@ const parseDateDDMMYYYY_UTC = (dateString) => {
 /**
  * Reusable DataTable component
  */
-const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, isFilterActive, onDelete, onAddClick }) => {
+const DataTable = ({ title, data, columns, dataType, onEditClick, onFilterClick, isFilterActive, onDelete, onAddClick }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [editingCell, setEditingCell] = useState(null);
     const [selectedRows, setSelectedRows] = useState(new Set());
 
     const filteredData = useMemo(() => {
@@ -114,72 +101,6 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
         document.body.removeChild(link);
     };
 
-    const handleCellClick = (index, key) => {
-        const isEditable = (dataType === 'products' && editableProductCols.includes(key)) ||
-            (dataType === 'stores' && editableStoreCols.includes(key));
-        if (isEditable) {
-            setEditingCell({ index, key });
-        }
-    };
-
-    const handleSave = (index, key, value) => {
-        let finalValue = value;
-        if ((key === 'openDate' || key === 'closeDate') && value) {
-            finalValue = formatDateForDisplay(value);
-        }
-
-        const item = data[index];
-        if (!item || !item._id) {
-            console.error("Cannot save: Item or item._id is missing.");
-            setEditingCell(null);
-            return;
-        }
-
-        onUpdate(index, item._id, key, finalValue);
-        setEditingCell(null);
-    };
-
-    const renderCell = (item, column, index) => {
-        const isEditable = (dataType === 'products' && editableProductCols.includes(column.key)) ||
-            (dataType === 'stores' && editableStoreCols.includes(column.key));
-        const isEditing = editingCell?.index === index && editingCell?.key === column.key;
-        const value = item[column.key];
-
-        if (isEditing) {
-            const isDate = column.key === 'openDate' || column.key === 'closeDate';
-            return (
-                <input
-                    type={isDate ? 'date' : 'text'}
-                    defaultValue={isDate ? formatDateForInput(value) : value}
-                    onBlur={(e) => handleSave(index, column.key, e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSave(index, column.key, e.target.value);
-                        if (e.key === 'Escape') setEditingCell(null);
-                    }}
-                    className="w-full p-1.5 border border-blue-500 rounded-md bg-gray-100 dark:bg-gray-900 focus:ring-1 focus:ring-blue-500 outline-none"
-                    autoFocus
-                />
-            );
-        }
-
-        if (isEditable) {
-            return (
-                <div className="group relative w-full">
-                    <input
-                        type="text"
-                        readOnly
-                        value={value}
-                        className="w-full cursor-pointer bg-transparent border border-gray-300 dark:border-gray-600 rounded-md p-1.5 pr-8 truncate group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors"
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Pencil className="w-4 h-4 text-blue-500" />
-                    </div>
-                </div>
-            );
-        }
-        return value;
-    };
-
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
@@ -192,22 +113,11 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                     <div className="flex items-center justify-end md:justify-start gap-2 w-full md:w-auto">
                         <My_button onClick={onAddClick} variant="primary" className="flex items-center">
                             <PlusCircle className="w-4 h-4 md:mr-2" />
-                            <span className="hidden md:inline">Add {dataType === 'products' ? 'Product' : 'Store'}</span>
+                            <span className="hidden md:inline">Add</span>
                         </My_button>
-                        {selectedRows.size > 0 && (
-                            <My_button onClick={handleDeleteClick} variant="danger" className="flex items-center">
-                                <Trash2 className="w-4 h-4 md:mr-2" />
-                                <span className="hidden md:inline">Delete ({selectedRows.size})</span>
-                            </My_button>
-                        )}
-                        <My_button onClick={handleExportCSV} variant="outline-blue" className="flex items-center">
-                            <FileUp className="w-4 h-4 md:mr-2" />
-                            <span className="hidden md:inline">Export CSV</span>
-                        </My_button>
-                        <My_button onClick={onFilterClick} variant={isFilterActive ? 'primary' : 'outline-dark'} className="flex items-center">
-                            <Filter className="w-4 h-4 md:mr-2" />
-                            <span className="hidden md:inline">Filter{isFilterActive && 's Active'}</span>
-                        </My_button>
+                        {selectedRows.size > 0 && (<My_button onClick={handleDeleteClick} variant="danger" className="flex items-center"><Trash2 className="w-4 h-4 md:mr-2" /><span className="hidden md:inline">Delete ({selectedRows.size})</span></My_button>)}
+                        <My_button onClick={handleExportCSV} variant="outline-blue" className="flex items-center"><FileUp className="w-4 h-4 md:mr-2" /><span className="hidden md:inline">Export CSV</span></My_button>
+                        <My_button onClick={onFilterClick} variant={isFilterActive ? 'primary' : 'outline-dark'} className="flex items-center"><Filter className="w-4 h-4 md:mr-2" /><span className="hidden md:inline">Filter{isFilterActive && 's Active'}</span></My_button>
                     </div>
                 </div>
             </div>
@@ -221,21 +131,27 @@ const DataTable = ({ title, data, columns, dataType, onUpdate, onFilterClick, is
                                 </div>
                             </th>
                             {columns.map(col => (<th key={col.key} scope="col" className={`px-6 py-3 font-semibold ${narrowColumnKeys.includes(col.key) ? 'w-48' : ''}`}>{col.label}</th>))}
+                            <th scope="col" className="px-6 py-3 font-semibold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredData.map((item, index) => (
-                            <tr key={item._id || index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        {filteredData.map((item) => (
+                            <tr key={item._id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 <td className="w-4 p-4">
                                     <div className="flex items-center">
                                         <input type="checkbox" checked={selectedRows.has(item._id)} onChange={() => handleRowSelect(item._id)} onClick={(e) => e.stopPropagation()} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
                                 </td>
                                 {columns.map(col => (
-                                    <td key={col.key} onClick={() => handleCellClick(index, col.key)} className={`px-6 py-2 text-gray-900 dark:text-white whitespace-nowrap ${narrowColumnKeys.includes(col.key) ? 'w-48' : ''}`}>
-                                        {renderCell(item, col, index)}
+                                    <td key={col.key} className={`px-6 py-2 text-gray-900 dark:text-white whitespace-nowrap ${narrowColumnKeys.includes(col.key) ? 'w-48' : ''}`}>
+                                        {item[col.key]}
                                     </td>
                                 ))}
+                                <td className="px-6 py-2 text-right">
+                                    <button onClick={() => onEditClick(item)} className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-blue-400">
+                                        <Pencil className="h-4 w-4" />
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -255,7 +171,20 @@ const DataPage = ({ initialProducts, initialStores }) => {
     const [stores, setStores] = useState(initialStores || []);
     const [isAddSidebarOpen, setAddSidebarOpen] = useState(false);
     const [isFilterSidebarOpen, setFilterSidebarOpen] = useState(false);
+    const [isEditSidebarOpen, setEditSidebarOpen] = useState(false); // <-- NEW STATE
+    const [itemToEdit, setItemToEdit] = useState(null); // <-- NEW STATE
     const [filters, setFilters] = useState({});
+
+    // --- NEW HANDLERS FOR EDIT SIDEBAR ---
+    const handleEditClick = (item) => {
+        setItemToEdit(item);
+        setEditSidebarOpen(true);
+    };
+
+    const handleCloseEditSidebar = () => {
+        setEditSidebarOpen(false);
+        setItemToEdit(null);
+    };
 
     const handleAddItem = async (newItem) => {
         const collectionName = activeTab;
@@ -294,25 +223,35 @@ const DataPage = ({ initialProducts, initialStores }) => {
         }
     };
 
-    const handleUpdate = async (index, id, field, value) => {
+    // --- MODIFIED UPDATE HANDLER ---
+    const handleUpdate = async (updatedItem) => {
         const collectionName = activeTab;
         const currentData = collectionName === 'products' ? products : stores;
         const setData = collectionName === 'products' ? setProducts : setStores;
 
-        const updatedData = [...currentData];
-        updatedData[index] = { ...updatedData[index], [field]: value };
+        // Optimistically update the UI
+        const updatedData = currentData.map(item => item._id === updatedItem._id ? updatedItem : item);
         setData(updatedData);
+        handleCloseEditSidebar();
+
+        // Separate the _id from the fields to update
+        const { _id, ...updateFields } = updatedItem;
 
         try {
-            const response = await fetch('/api/data', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collectionName, id, field, value }) });
+            const response = await fetch('/api/data', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ collectionName, id: _id, updates: updateFields })
+            });
             const result = await response.json();
             if (!result.success) {
+                // If the update failed, revert the UI and show an error
                 setData(currentData);
                 alert(`Error: Could not save your change. ${result.message}`);
             }
         } catch (error) {
             console.error("Update failed:", error);
-            setData(currentData);
+            setData(currentData); // Revert on error
             alert('An error occurred. Could not save your change.');
         }
     };
@@ -368,15 +307,17 @@ const DataPage = ({ initialProducts, initialStores }) => {
 
             <div>
                 {activeTab === 'products' && (
-                    <DataTable title="Products Data" data={filteredProductData} columns={productColumns} dataType="products" onUpdate={handleUpdate} onFilterClick={() => setFilterSidebarOpen(true)} isFilterActive={Object.keys(filters).length > 0} onDelete={handleDelete} onAddClick={() => setAddSidebarOpen(true)} />
+                    <DataTable title="Products Data" data={filteredProductData} columns={productColumns} dataType="products" onEditClick={handleEditClick} onFilterClick={() => setFilterSidebarOpen(true)} isFilterActive={Object.keys(filters).length > 0} onDelete={handleDelete} onAddClick={() => setAddSidebarOpen(true)} />
                 )}
                 {activeTab === 'stores' && (
-                    <DataTable title="Stores Data" data={filteredStoreData} columns={storeColumns} dataType="stores" onUpdate={handleUpdate} onFilterClick={() => setFilterSidebarOpen(true)} isFilterActive={Object.keys(filters).length > 0} onDelete={handleDelete} onAddClick={() => setAddSidebarOpen(true)} />
+                    <DataTable title="Stores Data" data={filteredStoreData} columns={storeColumns} dataType="stores" onEditClick={handleEditClick} onFilterClick={() => setFilterSidebarOpen(true)} isFilterActive={Object.keys(filters).length > 0} onDelete={handleDelete} onAddClick={() => setAddSidebarOpen(true)} />
                 )}
             </div>
 
             <AddDataSidebar isOpen={isAddSidebarOpen} onClose={() => setAddSidebarOpen(false)} dataType={activeTab} onAddItem={handleAddItem} />
             <FilterSidebar isOpen={isFilterSidebarOpen} onClose={() => setFilterSidebarOpen(false)} onApply={handleApplyFilters} onReset={handleResetFilters} dataType={activeTab} initialFilters={filters} />
+            {/* --- RENDER THE NEW EDIT SIDEBAR --- */}
+            <EditDataSidebar isOpen={isEditSidebarOpen} onClose={handleCloseEditSidebar} dataType={activeTab} itemToEdit={itemToEdit} onSave={handleUpdate} />
         </div>
     );
 };

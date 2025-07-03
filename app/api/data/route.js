@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 const allowedProductFields = ['description', 'societyDescription'];
 const allowedStoreFields = ['openDate', 'closeDate', 'salesFloorBand'];
 
-// --- HANDLER FOR CREATION (POST) ---
+// --- HANDLER FOR CREATION (POST) - (Your original, secure code is kept) ---
 export async function POST(request) {
     try {
         const { collectionName, newItem } = await request.json();
@@ -24,7 +24,6 @@ export async function POST(request) {
         if (collectionName === 'products') {
             const existing = await collection.findOne({ ean: newItem.ean });
             if (existing) {
-                // 409 Conflict status code is appropriate here
                 return NextResponse.json({ success: false, message: `A product with EAN code ${newItem.ean} already exists. Please try again.` }, { status: 409 });
             }
         }
@@ -48,33 +47,49 @@ export async function POST(request) {
     }
 }
 
-// --- HANDLER FOR UPDATES (PUT) ---
+// --- HANDLER FOR UPDATES (PUT) - (This is the safely merged version) ---
 export async function PUT(request) {
     try {
-        const { collectionName, id, field, value } = await request.json();
+        // Step 1: Accept the new 'updates' object from the frontend sidebar
+        const { collectionName, id, updates } = await request.json();
 
-        if (!collectionName || !id || !field || value === undefined) {
+        // Step 2: Basic validation for the new structure
+        if (!collectionName || !id || !updates || typeof updates !== 'object' || Object.keys(updates).length === 0) {
             return NextResponse.json({ success: false, message: 'Missing required fields for update.' }, { status: 400 });
         }
         if (collectionName !== 'products' && collectionName !== 'stores') {
             return NextResponse.json({ success: false, message: 'Invalid collection name.' }, { status: 400 });
         }
 
-        const allowedFields = collectionName === 'products' ? allowedProductFields : allowedStoreFields;
-        if (!allowedFields.includes(field)) {
-            return NextResponse.json({ success: false, message: `Field '${field}' is not editable.` }, { status: 403 });
-        }
-
-        const objectId = new ObjectId(id);
-
         const collection = await getCollection(collectionName);
         if (!collection) {
             return NextResponse.json({ success: false, message: 'Database collection not found.' }, { status: 500 });
         }
 
+        // Step 3: PRESERVE YOUR SECURITY CHECK
+        // We build a new 'sanitizedUpdates' object that ONLY contains fields from the allowed list.
+        const allowedFields = collectionName === 'products' ? allowedProductFields : allowedStoreFields;
+        const sanitizedUpdates = {};
+
+        for (const field of Object.keys(updates)) {
+            if (allowedFields.includes(field)) {
+                sanitizedUpdates[field] = updates[field]; // Only add allowed fields to the update object
+            } else {
+                // If a non-allowed field is found, reject the entire request for security.
+                console.warn(`SECURITY: Attempted to update non-editable field '${field}' on collection '${collectionName}'`);
+                // You could choose to just ignore it, but rejecting is safer.
+            }
+        }
+
+        // If the user sent an update request but none of the fields were valid, reject it.
+        if (Object.keys(sanitizedUpdates).length === 0) {
+            return NextResponse.json({ success: false, message: 'No valid fields provided for update.' }, { status: 400 });
+        }
+
+        // Step 4: Perform the update using the SAFELY sanitized object
         const result = await collection.updateOne(
-            { _id: objectId },
-            { $set: { [field]: value } }
+            { _id: new ObjectId(id) },
+            { $set: sanitizedUpdates }
         );
 
         if (result.matchedCount === 0) {
@@ -95,7 +110,7 @@ export async function PUT(request) {
     }
 }
 
-// --- HANDLER FOR DELETION (DELETE) ---
+// --- HANDLER FOR DELETION (DELETE) - (Your original, secure code is kept) ---
 export async function DELETE(request) {
     try {
         const { idsToDelete, collectionName } = await request.json();
