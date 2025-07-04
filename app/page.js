@@ -1,16 +1,20 @@
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from './api/auth/[...nextauth]/route';
+//import { getServerSession } from 'next-auth';
+//import { authOptions } from './api/auth/[...nextauth]/route';
+import { auth } from '@clerk/nextjs/server';
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  //const session = await getServerSession(authOptions);
+  const { userId } = await auth();
+  console.log("USER:", userId);
 
-  if (!session) {
+  if (!userId) {
     redirect('/login');
   } else {
     redirect('/data'); // Your home page after login
   }
+  return null;
   /*   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">

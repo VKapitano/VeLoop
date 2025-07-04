@@ -1,4 +1,5 @@
 // app/actions.js
+{/*
 'use server'; // <-- Ključna direktiva koja ovo čini Server Action datotekom
 
 import { cookies } from 'next/headers';
@@ -11,3 +12,4 @@ export async function logout() {
   // Preusmjeravanje na login stranicu
   redirect('/login');
 }
+  */}
