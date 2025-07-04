@@ -502,7 +502,7 @@ const RangeForm = ({ mode = 'add', rangeId = null }) => {
                     ) : (
                         <div className="text-center py-10">
                             <p className="text-gray-500 dark:text-gray-400">No items have been added yet.</p>
-                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">Click "+ Add Item" to get started.</p>
+                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">Click &quot;+ Add Item&quot; to get started.</p>
                         </div>
                     )}
                 </div>
