@@ -1,7 +1,7 @@
 import RangeForm from '@/app/components/RangeForm';
 
-const page = () => {
+const Page = () => {
     return <RangeForm mode="add" />;
 };
 
-export default page;
+export default Page;

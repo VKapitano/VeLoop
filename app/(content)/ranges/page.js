@@ -9,7 +9,7 @@ import Ranges_list from '../../components/Ranges_list'
 import Search_bar from '@/app/components/Search_bar'
 
 
-const page = () => {
+const Page = () => {
     const { ranges } = useRanges();
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -36,4 +36,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page
