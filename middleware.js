@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server';
 const isPublicRoute = createRouteMatcher(['/login(.*)', '/register(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
+  const { userId, sessionId, orgId } = auth;
+  console.log('Middleware auth:', { userId, sessionId, orgId, pathname: req.nextUrl.pathname });
+  
   if (!isPublicRoute(req)) {
     await auth.protect({
       unauthotizedUrl: new URL('/login', req.url),

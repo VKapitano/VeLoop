@@ -94,7 +94,7 @@ const Sidenav = () => {
                                 <Image src={coopLogo} alt="Logo Icon" width={32} height={32} className="flex-shrink-0" />
                             </div>
                             <span className="text-xl font-bold whitespace-nowrap dark:text-white transition-opacity duration-300 lg:w-0 lg:opacity-0 group-hover:lg:w-auto group-hover:lg:opacity-100">
-                                COOP
+                                VeLoop
                             </span>
                         </Link>
                     </div>
