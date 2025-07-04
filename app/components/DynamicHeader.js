@@ -30,14 +30,14 @@ const DynamicHeader = ({ username }) => {
 
     // Funkcija koja će se pozvati na klik
     const handleLogout = () => {
-        // Poziv NextAuth funkcije za odjavu.
-        // Ona će očistiti kolačić i preusmjeriti korisnika.
-        // signOut({ callbackUrl: '/login' }); // <-- Možete specificirati gdje da preusmjeri korisnika nakon odjave
+        // Poziv Clerk funkcije za odjavu.
+        // Ona će očistiti sesiju i preusmjeriti korisnika.
         signOut({ redirectUrl: '/login' });
     };
 
-    // Renderira originalnu "glupu" Header komponentu s dinamičkim naslovom
-    return <Header title={title} username={username} onLogout={handleLogout} />;
+    // Renderira Header komponentu. Prop 'username' se više ne prosljeđuje
+    // jer Header sada koristi 'useUser' hook da dohvati podatke o korisniku.
+    return <Header title={title} onLogout={handleLogout} />;
 };
 
 export default DynamicHeader;
