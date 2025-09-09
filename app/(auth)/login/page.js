@@ -153,9 +153,9 @@ export default function LoginPage() {
 
         {/* You can now safely remove this testing info box! */}
         <div className='mt-8 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-md text-sm dark:text-gray-300'>
-          <p className='font-medium'>For testing, use these credentials:</p>
-          <p>Email: test@example.com</p>
-          <p>Password: password123</p>
+          <p className='font-medium text-red-500'>For testing, use these credentials:</p>
+          <p className='text-red-500'>Email: test@example.com</p>
+          <p className='text-red-500'>Password: password123</p>
         </div>
       </div>
     </div>
